@@ -152,6 +152,8 @@ public final class MystScreen extends Screen {
         c.fill(0, 0, width, height, 0xC9080610);
         c.fill(px - 5, py - 5, px + pw + 5, py + ph + 5, 0x663D2B56);
         c.fill(px, py, px + pw, py + ph, PANEL);
+        c.fill(px, py, px + pw, py + 3, accent());
+        c.fill(px + sw + 10, py + 65, px + pw - 10, py + 66, 0xFF3A2C4B);
         c.fill(px, py, px + sw, py + ph, SIDEBAR);
         c.fill(px + sw - 1, py, px + sw, py + ph, 0xFF352844);
         c.fill(px + sw, py + 66, px + pw, py + 67, 0xFF352844);
@@ -161,6 +163,7 @@ public final class MystScreen extends Screen {
         c.drawTextWithShadow(textRenderer, "MYST", px + 62, py + 19, WHITE);
         c.drawTextWithShadow(textRenderer, "VISUALS", px + 62, py + 34, accent());
         c.drawTextWithShadow(textRenderer, "CLIENT MENU", px + 18, py + 75, MUTED);
+        c.drawTextWithShadow(textRenderer, "1.21.11  •  MYST", px + 18, py + ph - 39, 0xFF756A82);
 
         int navY = py + 88;
         for (Page p : Page.values()) {
@@ -170,7 +173,8 @@ public final class MystScreen extends Screen {
                 c.fill(px + 9, y - 4, px + sw - 9, y + 25, 0xFF332445);
                 c.fill(px + 9, y - 4, px + 12, y + 25, accent());
             }
-            c.drawTextWithShadow(textRenderer, p.label, px + 21, y + 5, active ? WHITE : MUTED);
+            c.drawTextWithShadow(textRenderer, String.format(java.util.Locale.ROOT, "%02d", p.ordinal() + 1), px + 18, y + 5, active ? accent() : 0xFF655A72);
+            c.drawTextWithShadow(textRenderer, p.label, px + 43, y + 5, active ? WHITE : MUTED);
         }
 
         int headX = px + sw + 24;
@@ -201,9 +205,11 @@ public final class MystScreen extends Screen {
             int y = contentTop + 4 + row * rowStep - scrollOffset;
             boolean hovered = mx >= x && mx <= x + cw && my >= y && my <= y + cardHeight;
             c.fill(x, y, x + cw, y + cardHeight, hovered ? CARD_HOVER : CARD);
+            c.fill(x, y, x + cw, y + 2, card.implemented ? accentDark() : 0xFF51465D);
             c.fill(x, y, x + 3, y + cardHeight, card.implemented ? accentDark() : 0xFF51465D);
             c.drawTextWithShadow(textRenderer, card.title, x + 13, y + 10, WHITE);
             c.drawTextWithShadow(textRenderer, card.description, x + 13, y + 27, MUTED);
+            c.drawTextWithShadow(textRenderer, card.implemented ? "READY" : "PLANNED", x + 13, y + cardHeight - 16, card.implemented ? accent() : MUTED);
             if (card.implemented) {
                 boolean enabled = isEnabled(card.id);
                 int sx = x + cw - 54;
@@ -373,8 +379,8 @@ public final class MystScreen extends Screen {
         if (click.button() == 0) {
             int navY = py + 88;
             for (Page p : Page.values()) {
-                int y = navY + p.ordinal() * 33;
-                if (mx >= px + 8 && mx <= px + sw - 8 && my >= y - 5 && my <= y + 28) {
+                int y = navY + p.ordinal() * 27;
+                if (mx >= px + 8 && mx <= px + sw - 8 && my >= y - 4 && my <= y + 25) {
                     select(p);
                     return true;
                 }
