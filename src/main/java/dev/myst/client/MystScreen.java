@@ -181,8 +181,10 @@ public final class MystScreen extends Screen {
         int contentRight = px + pw - 20;
         c.enableScissor(contentLeft, contentTop, contentRight, contentBottom);
         List<ModuleCard> list = cards();
-        int gap = 12;
-        int cw = Math.max(150, (contentRight - contentLeft - gap) / 2);
+        int gap = 10;
+        int cardHeight = MystUiConfig.compact ? 64 : 78;
+        int rowStep = cardHeight + 12;
+        int cw = Math.max(140, (contentRight - contentLeft - gap) / 2);
         int row = 0;
         for (int i = 0; i < list.size(); i++) {
             ModuleCard card = list.get(i);
@@ -190,7 +192,7 @@ public final class MystScreen extends Screen {
             row = i / 2;
             int x = contentLeft + col * (cw + gap);
             int y = contentTop + 4 + row * rowStep - scrollOffset;
-            boolean hovered = mx >= x && mx <= x + cw && my >= y && my <= y + 80;
+            boolean hovered = mx >= x && mx <= x + cw && my >= y && my <= y + cardHeight;
             c.fill(x, y, x + cw, y + cardHeight, hovered ? CARD_HOVER : CARD);
             c.fill(x, y, x + 3, y + cardHeight, card.implemented ? accentDark() : 0xFF51465D);
             c.drawTextWithShadow(textRenderer, card.title, x + 13, y + 10, WHITE);
@@ -266,12 +268,14 @@ public final class MystScreen extends Screen {
             if (mx >= px + pw - 114 && mx < px + pw - 84) {
                 pw = Math.max(Math.min(MIN_W, width - 16), pw - 55);
                 ph = Math.max(Math.min(MIN_H, height - 16), ph - 35);
+                MystUiConfig.width = pw; MystUiConfig.height = ph; MystUiConfig.save();
                 rebuild();
                 return true;
             }
             if (mx >= px + pw - 82 && mx < px + pw - 52) {
                 pw = Math.min(Math.min(MAX_W, width - 16), pw + 55);
                 ph = Math.min(Math.min(MAX_H, height - 16), ph + 35);
+                MystUiConfig.width = pw; MystUiConfig.height = ph; MystUiConfig.save();
                 rebuild();
                 return true;
             }
@@ -350,10 +354,10 @@ public final class MystScreen extends Screen {
             }
         }
         if (click.button() == 1 && page == Page.MARKS) {
-            int contentLeft = px + sw + 24, contentTop = py + 82;
-            int cw = Math.max(150, (pw - sw - 68) / 2);
+            int contentLeft = px + sw + 24, contentTop = py + 74;
+            int cw = Math.max(140, (pw - sw - 68) / 2);
             if (mx >= contentLeft && mx <= contentLeft + cw
-                    && my >= contentTop + 4 - scrollOffset && my <= contentTop + 84 - scrollOffset) {
+                    && my >= contentTop + 4 - scrollOffset && my <= contentTop + (MystUiConfig.compact ? 68 : 82) - scrollOffset) {
                 client.setScreen(new WaypointScreen(this));
                 return true;
             }
