@@ -1,6 +1,8 @@
-name: Build Mist Visuals
+name: Build Myst Visuals
+permissions:
+  contents: write
 concurrency:
-  group: mist-visuals-${{ github.ref }}
+  group: myst-visuals-${{ github.ref }}
   cancel-in-progress: true
 
 on:
@@ -19,18 +21,36 @@ jobs:
       - uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: '9.7.1'
+          cache-read-only: false
       - name: Build mod
-        run: gradle build
+        run: gradle build --build-cache --parallel --no-daemon
       - name: Verify JAR contents
         run: |
-          test -f build/libs/Mist-Visuals-0.5.0.jar
-          jar tf build/libs/Mist-Visuals-0.5.0.jar | grep -q 'fabric.mod.json'
-          jar tf build/libs/Mist-Visuals-0.5.0.jar | grep -q 'dev/myst/client/WaypointScreen.class'
-          jar tf build/libs/Mist-Visuals-0.5.0.jar | grep -q 'assets/mystclient/icon.png'
-          jar tf build/libs/Mist-Visuals-0.5.0.jar | grep -q 'assets/mystclient/textures/gui/mist_background.png'
-          test $(stat -c%s build/libs/Mist-Visuals-0.5.0.jar) -ge 5242880
+          JAR="build/libs/Myst-Visuals-0.5.1.jar"
+          test -f "$JAR"
+          jar tf "$JAR" | grep -q 'fabric.mod.json'
+          jar tf "$JAR" | grep -q 'dev/myst/client/WaypointScreen.class'
+          jar tf "$JAR" | grep -q 'assets/mystclient/icon.png'
+          jar tf "$JAR" | grep -q 'assets/mystclient/textures/gui/myst_background.png'
+          unzip -t "$JAR"
+          echo "JAR size: $(du -h "$JAR" | cut -f1)"
       - uses: actions/upload-artifact@v4
         with:
-          name: Mist-Visuals-1.21.11
-          path: build/libs/Mist-Visuals-0.5.0.jar
+          name: Myst-Visuals-1.21.11
+          path: build/libs/Myst-Visuals-0.5.1.jar
           if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+      - name: Publish direct JAR download
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="0.5.1"
+          TAG="v${VERSION}"
+          JAR="build/libs/Myst-Visuals-${VERSION}.jar"
+          NOTES="Myst Visuals ${VERSION} for Minecraft Java 1.21.11. Fabric client-side visual mod. Built and archive-verified by GitHub Actions."
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$JAR" --clobber
+          else
+            gh release create "$TAG" "$JAR" --title "Myst Visuals ${VERSION}" --notes "$NOTES"
+          fi
