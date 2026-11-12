@@ -264,14 +264,14 @@ public final class MystScreen extends Screen {
         }
         if (click.button() == 0 && my >= py + 12 && my <= py + 48) {
             if (mx >= px + pw - 114 && mx < px + pw - 84) {
-                pw = Math.min(Math.min(MAX_W, width - 16), pw + 55);
-                ph = Math.min(Math.min(MAX_H, height - 16), ph + 35);
+                pw = Math.max(Math.min(MIN_W, width - 16), pw - 55);
+                ph = Math.max(Math.min(MIN_H, height - 16), ph - 35);
                 rebuild();
                 return true;
             }
             if (mx >= px + pw - 82 && mx < px + pw - 52) {
-                pw = Math.max(Math.min(MIN_W, width - 16), pw - 55);
-                ph = Math.max(Math.min(MIN_H, height - 16), ph - 35);
+                pw = Math.min(Math.min(MAX_W, width - 16), pw + 55);
+                ph = Math.min(Math.min(MAX_H, height - 16), ph + 35);
                 rebuild();
                 return true;
             }
@@ -317,7 +317,9 @@ public final class MystScreen extends Screen {
             int contentLeft = px + sw + 24, contentRight = px + pw - 20;
             if (mx >= contentLeft && mx <= contentRight && my >= contentTop && my <= contentBottom) {
                 List<ModuleCard> list = cards();
-                int gap = 10, cw = Math.max(140, (contentRight - contentLeft - gap) / 2);\n                int cardHeight = MystUiConfig.compact ? 64 : 78;\n                int rowStep = cardHeight + 12;
+                int gap = 10, cw = Math.max(140, (contentRight - contentLeft - gap) / 2);
+                int cardHeight = MystUiConfig.compact ? 64 : 78;
+                int rowStep = cardHeight + 12;
                 for (int i = 0; i < list.size(); i++) {
                     ModuleCard card = list.get(i);
                     int col = i % 2, row = i / 2;
