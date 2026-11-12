@@ -37,7 +37,8 @@ public final class MystScreen extends Screen {
     private static final int MAX_W = 1160, MAX_H = 760;
     private static final int PANEL = 0xF0110D1B, SIDEBAR = 0xF00D0A15;
     private static final int CARD = 0xF01D1728, CARD_HOVER = 0xFF292039;
-    private int accent() { return MystUiConfig.accent(); }\n    private int accentDark() { return 0xFF8152C5; }
+    private int accent() { return MystUiConfig.accent(); }
+    private int accentDark() { return 0xFF8152C5; }
     private static final int WHITE = 0xFFF4F0FA, MUTED = 0xFF9D91AD;
 
     public MystScreen() { super(Text.literal("Myst Visuals")); }
@@ -135,7 +136,7 @@ public final class MystScreen extends Screen {
 
     private void clampScroll() {
         int rows = (cards().size() + 1) / 2;
-        contentHeight = 48 + rows * 94;
+        contentHeight = 40 + rows * ((MystUiConfig.compact ? 64 : 78) + 12);
         int viewport = Math.max(100, ph - 120);
         scrollOffset = Math.max(0, Math.min(scrollOffset, Math.max(0, contentHeight - viewport)));
     }
@@ -210,6 +211,20 @@ public final class MystScreen extends Screen {
             drawSmallButton(c, contentLeft, contentTop + 258 - scrollOffset, 142, "СОХРАНИТЬ НИК");
             c.drawTextWithShadow(textRenderer, "Замена действует только локально.", contentLeft + 154, contentTop + 266 - scrollOffset, MUTED);
         }
+        if (page == Page.CONFIGS) {
+            int sy = contentTop + 20;
+            c.drawTextWithShadow(textRenderer, "ОФОРМЛЕНИЕ", contentLeft, sy, WHITE);
+            drawSmallButton(c, contentLeft, sy + 18, 190, "ЦВЕТ АКЦЕНТА: " + (MystUiConfig.theme + 1));
+            c.fill(contentLeft + 202, sy + 18, contentLeft + 238, sy + 43, accent());
+            c.drawTextWithShadow(textRenderer, "ПЛОТНОСТЬ КАРТОЧЕК", contentLeft, sy + 62, WHITE);
+            drawSmallButton(c, contentLeft, sy + 80, 190, MystUiConfig.compact ? "КОМПАКТНО: ВКЛ" : "КОМПАКТНО: ВЫКЛ");
+            c.drawTextWithShadow(textRenderer, "РАЗМЕР ОКНА", contentLeft, sy + 124, WHITE);
+            drawSmallButton(c, contentLeft, sy + 142, 90, "МЕНЬШЕ");
+            drawSmallButton(c, contentLeft + 100, sy + 142, 90, "БОЛЬШЕ");
+            drawSmallButton(c, contentLeft + 200, sy + 142, 130, "СБРОСИТЬ");
+            c.drawTextWithShadow(textRenderer, "Размер: " + pw + " × " + ph, contentLeft, sy + 184, MUTED);
+            c.drawTextWithShadow(textRenderer, "Можно также тянуть за правый нижний угол.", contentLeft, sy + 205, MUTED);
+        }
         c.disableScissor();
         int viewportHeight = contentBottom - contentTop;
         if (contentHeight > viewportHeight) {
@@ -218,7 +233,7 @@ public final class MystScreen extends Screen {
             int thumbHeight = Math.max(24, viewportHeight * viewportHeight / contentHeight);
             int maxScroll = Math.max(1, contentHeight - viewportHeight);
             int thumbY = contentTop + 3 + (viewportHeight - thumbHeight) * scrollOffset / maxScroll;
-            c.fill(trackX - 1, thumbY, trackX + 4, thumbY + thumbHeight, PURPLE);
+            c.fill(trackX - 1, thumbY, trackX + 4, thumbY + thumbHeight, accent());
         }
 
         c.drawTextWithShadow(textRenderer, "КОЛЁСИКО — ПРОКРУТКА", px + 18, py + ph - 20, 0xFF756A82);
@@ -261,6 +276,33 @@ public final class MystScreen extends Screen {
                 return true;
             }
             if (mx >= px + pw - 46) { close(); return true; }
+        }
+        if (click.button() == 0 && page == Page.CONFIGS) {
+            int contentLeft = px + sw + 24, sy = py + 74 + 20;
+            if (mx >= contentLeft && mx <= contentLeft + 190 && my >= sy + 18 && my <= sy + 43) {
+                MystUiConfig.theme = (MystUiConfig.theme + 1) % MystUiConfig.ACCENTS.length;
+                MystUiConfig.save();
+                return true;
+            }
+            if (mx >= contentLeft && mx <= contentLeft + 190 && my >= sy + 80 && my <= sy + 105) {
+                MystUiConfig.compact = !MystUiConfig.compact;
+                MystUiConfig.save();
+                clampScroll();
+                return true;
+            }
+            if (my >= sy + 142 && my <= sy + 167) {
+                if (mx <= contentLeft + 95) {
+                    pw = Math.max(MIN_W, pw - 40); ph = Math.max(MIN_H, ph - 25);
+                } else if (mx <= contentLeft + 195) {
+                    pw = Math.min(Math.min(MAX_W, width - 16), pw + 40); ph = Math.min(Math.min(MAX_H, height - 16), ph + 25);
+                } else {
+                    pw = Math.min(760, width - 16); ph = Math.min(460, height - 16);
+                    MystUiConfig.theme = 0; MystUiConfig.compact = true;
+                }
+                MystUiConfig.width = pw; MystUiConfig.height = ph; MystUiConfig.save();
+                rebuild();
+                return true;
+            }
         }
         if (click.button() == 0) {
             int navY = py + 88;
