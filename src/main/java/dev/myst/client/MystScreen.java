@@ -1,6 +1,7 @@
 package dev.myst.client;
 
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
@@ -161,8 +162,9 @@ public final class MystScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mx,double my,int button) {
-        if (button==0) {
+    public boolean mouseClicked(Click click, boolean doubled) {
+        double mx = click.x(), my = click.y();
+        if (click.button()==0) {
             int navY=py+100;
             for(Page p:Page.values()) {
                 int y=navY+p.ordinal()*42;
@@ -200,7 +202,7 @@ public final class MystScreen extends Screen {
             }
             return true;
         }
-        return super.mouseClicked(mx,my,button);
+        return super.mouseClicked(click,doubled);
     }
 
     @Override public boolean shouldPause(){return false;}
