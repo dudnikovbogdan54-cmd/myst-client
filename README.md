@@ -14,12 +14,12 @@ A custom client-side Fabric mod for Minecraft Java 1.21.11, created by **Owner A
 - Minecraft Java 1.21.11
 - Fabric Loader 0.19.5 or newer
 - Fabric API for 1.21.11
-- Java 21 or newer
+- Java 21 or newer at runtime
 
 Streamer aliases are client-side display changes only. They do not change account names or server-side names. Android and MojoLauncher runtime compatibility must still be confirmed by testing on the target device.
 
 ## Build
-Requires Java 21 and Gradle 9.2.1 or newer:
+This project uses Fabric Loom 1.18.2, which requires JDK 25 and Gradle 9.7.1 for building. The resulting mod is compiled for Java 21 and is intended to run on Minecraft's Java 21 runtime.
 
 ```sh
 gradle build
