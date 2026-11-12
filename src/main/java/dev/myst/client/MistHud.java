@@ -10,6 +10,9 @@ import net.minecraft.util.hit.HitResult;
 public final class MistHud {
     private static final int PURPLE = 0xFFB58AFF;
     private static final int PANEL = 0xD91A1425;
+    private static java.util.UUID trackedTarget;
+    private static float previousHealth = -1.0F;
+    private static long killEffectUntil;
     private MistHud() {}
 
     public static void register() {
@@ -61,6 +64,73 @@ public final class MistHud {
             panel(ctx, x, by, Math.min(190, mc.textRenderer.getWidth(name) + 18), 20);
             ctx.drawTextWithShadow(mc.textRenderer, name, x + 8, by + 6, 0xFFF1E9FF);
         }
+        if (MistConfig.enabled("crosshair")) drawCrosshair(ctx);
+        if (MistConfig.enabled("keystrokes")) drawKeystrokes(ctx, mc);
+        if (MistConfig.enabled("kill_effect") && System.currentTimeMillis() < killEffectUntil) drawKillEffect(ctx);
+    }
+
+    private static void drawCrosshair(DrawContext ctx) {
+        int cx = ctx.getScaledWindowWidth() / 2;
+        int cy = ctx.getScaledWindowHeight() / 2;
+        int color = 0xFFE7D5FF;
+        ctx.fill(cx - 1, cy - 7, cx + 1, cy - 3, color);
+        ctx.fill(cx - 1, cy + 3, cx + 1, cy + 7, color);
+        ctx.fill(cx - 7, cy - 1, cx - 3, cy + 1, color);
+        ctx.fill(cx + 3, cy - 1, cx + 7, cy + 1, color);
+        ctx.fill(cx - 1, cy - 1, cx + 1, cy + 1, PURPLE);
+    }
+
+    private static void drawKeystrokes(DrawContext ctx, MinecraftClient mc) {
+        int x = 8, y = ctx.getScaledWindowHeight() - 76;
+        drawKey(ctx, mc, x + 22, y, "W", mc.options.forwardKey.isPressed());
+        drawKey(ctx, mc, x, y + 22, "A", mc.options.leftKey.isPressed());
+        drawKey(ctx, mc, x + 22, y + 22, "S", mc.options.backKey.isPressed());
+        drawKey(ctx, mc, x + 44, y + 22, "D", mc.options.rightKey.isPressed());
+        drawKey(ctx, mc, x, y + 44, "LMB", mc.options.attackKey.isPressed());
+        drawKey(ctx, mc, x + 44, y + 44, "RMB", mc.options.useKey.isPressed());
+    }
+
+    private static void drawKey(DrawContext ctx, MinecraftClient mc, int x, int y, String label, boolean pressed) {
+        ctx.fill(x, y, x + 40, y + 19, pressed ? 0xFF65458C : PANEL);
+        ctx.fill(x, y, x + 40, y + 1, pressed ? PURPLE : 0xFF493B58);
+        int tw = mc.textRenderer.getWidth(label);
+        ctx.drawTextWithShadow(mc.textRenderer, label, x + (40 - tw) / 2, y + 6, 0xFFF5EEFF);
+    }
+
+    private static void drawKillEffect(DrawContext ctx) {
+        int cx = ctx.getScaledWindowWidth() / 2;
+        int cy = ctx.getScaledWindowHeight() / 2;
+        long remaining = Math.max(0L, killEffectUntil - System.currentTimeMillis());
+        int alpha = (int)(Math.min(1.0, remaining / 650.0) * 150);
+        int color = (alpha << 24) | 0xB58AFF;
+        for (int i = 0; i < 4; i++) {
+            int radius = 12 + i * 7;
+            ctx.fill(cx - radius, cy - radius, cx + radius, cy - radius + 1, color);
+            ctx.fill(cx - radius, cy + radius - 1, cx + radius, cy + radius, color);
+            ctx.fill(cx - radius, cy - radius, cx - radius + 1, cy + radius, color);
+            ctx.fill(cx + radius - 1, cy - radius, cx + radius, cy + radius, color);
+        }
+    }
+
+    public static void tick() {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null || mc.targetedEntity == null) {
+            trackedTarget = null;
+            previousHealth = -1.0F;
+            return;
+        }
+        if (!(mc.targetedEntity instanceof LivingEntity target)) return;
+        java.util.UUID id = target.getUuid();
+        if (!id.equals(trackedTarget)) {
+            trackedTarget = id;
+            previousHealth = target.getHealth();
+            return;
+        }
+        float health = target.getHealth();
+        if (previousHealth > 0.0F && health <= 0.0F && MistConfig.enabled("kill_effect")) {
+            killEffectUntil = System.currentTimeMillis() + 650L;
+        }
+        previousHealth = health;
     }
 
     private static void panel(DrawContext ctx, int x, int y, int w, int h) {
