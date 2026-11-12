@@ -12,6 +12,10 @@ public final class MistConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path FILE = FabricLoader.getInstance().getConfigDir().resolve("mist-visuals.json");
     public static final Map<String, Boolean> modules = new LinkedHashMap<>();
+        boolean waypointSet;
+        double waypointX, waypointY, waypointZ;
+    public static boolean waypointSet = false;
+    public static double waypointX, waypointY, waypointZ;
     private static final class Data {
         Map<String, Boolean> modules = new LinkedHashMap<>();
     }
@@ -24,13 +28,22 @@ public final class MistConfig {
         try {
             if (!Files.exists(FILE)) { save(); return; }
             Data data = GSON.fromJson(Files.readString(FILE), Data.class);
-            if (data != null && data.modules != null) modules.putAll(data.modules);
+            if (data != null) {
+                if (data.modules != null) modules.putAll(data.modules);
+                waypointSet = data.waypointSet;
+                waypointX = data.waypointX; waypointY = data.waypointY; waypointZ = data.waypointZ;
+            }
         } catch (Exception ignored) { }
+    }
+    public static void setWaypoint(double x, double y, double z) {
+        waypointX = x; waypointY = y; waypointZ = z; waypointSet = true; save();
     }
     public static void save() {
         try {
             Data data = new Data();
             data.modules.putAll(modules);
+            data.waypointSet = waypointSet;
+            data.waypointX = waypointX; data.waypointY = waypointY; data.waypointZ = waypointZ;
             Files.createDirectories(FILE.getParent());
             Files.writeString(FILE, GSON.toJson(data));
         } catch (Exception ignored) { }
