@@ -45,7 +45,7 @@ public final class MystScreen extends Screen {
     @Override
     protected void init() {
         pw = Math.max(Math.min(MIN_W, width - 16), Math.min(pw == 0 ? 980 : pw, Math.min(MAX_W, width - 16)));
-        ph = Math.max(Math.min(MIN_H, height - 16), Math.min(ph == 0 ? 590 : ph, Math.min(MAX_H, height - 16)));
+        ph = Math.max(Math.min(MIN_H, height - 16), Math.min(ph == 0 ? 480 : ph, Math.min(MAX_H, height - 16)));
         px = (width - pw) / 2;
         py = (height - ph) / 2;
         sw = Math.max(138, Math.min(178, pw / 5));
@@ -136,7 +136,7 @@ public final class MystScreen extends Screen {
     private void clampScroll() {
         int rows = (cards().size() + 1) / 2;
         contentHeight = 48 + rows * 94;
-        int viewport = Math.max(100, ph - 158);
+        int viewport = Math.max(100, ph - 120);
         scrollOffset = Math.max(0, Math.min(scrollOffset, Math.max(0, contentHeight - viewport)));
     }
 
