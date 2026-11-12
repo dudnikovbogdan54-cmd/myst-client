@@ -1,4 +1,8 @@
 name: Build Mist Visuals
+concurrency:
+  group: mist-visuals-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [ main ]
