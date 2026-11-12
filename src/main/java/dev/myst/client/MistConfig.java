@@ -3,6 +3,7 @@ package dev.myst.client;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -24,8 +25,10 @@ public final class MistConfig {
         public boolean enabled = true;
         public boolean showDistance = true;
         public int color = 0xFFB58AFF;
+        public String dimension = "";
         public Waypoint(String name, double x, double y, double z) {
             this.name = name; this.x = x; this.y = y; this.z = z;
+            this.dimension = currentDimension();
         }
     }
 
@@ -34,6 +37,11 @@ public final class MistConfig {
         List<Waypoint> waypoints = new ArrayList<>();
         boolean waypointSet;
         double waypointX, waypointY, waypointZ;
+    }
+
+    public static String currentDimension() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        return client.world == null ? "" : client.world.getRegistryKey().getValue().toString();
     }
 
     public static boolean enabled(String id) { return modules.getOrDefault(id, defaultValue(id)); }
@@ -49,11 +57,13 @@ public final class MistConfig {
                 if (data.modules != null) modules.putAll(data.modules);
                 if (data.waypoints != null) {
                     waypoints.clear();
-                    for (Waypoint point : data.waypoints) if (point != null) waypoints.add(point);
+                    for (Waypoint point : data.waypoints) if (point != null) {
+                        if (point.dimension == null) point.dimension = "";
+                        waypoints.add(point);
+                    }
                 }
                 waypointSet = data.waypointSet;
                 waypointX = data.waypointX; waypointY = data.waypointY; waypointZ = data.waypointZ;
-                // Migrate the single-point format used by earlier Mist Visuals builds.
                 if (waypoints.isEmpty() && waypointSet) {
                     waypoints.add(new Waypoint("Старая метка", waypointX, waypointY, waypointZ));
                 }
