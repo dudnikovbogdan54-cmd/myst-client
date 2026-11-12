@@ -26,7 +26,7 @@ jobs:
         run: gradle build --build-cache --parallel --no-daemon
       - name: Verify JAR contents
         run: |
-          JAR="build/libs/Myst-Visuals-0.5.3.jar"
+          JAR="build/libs/Myst-Visuals-0.5.4.jar"
           test -f "$JAR"
           jar tf "$JAR" | grep -q 'fabric.mod.json'
           jar tf "$JAR" | grep -q 'dev/myst/client/WaypointScreen.class'
@@ -37,7 +37,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: Myst-Visuals-1.21.11
-          path: build/libs/Myst-Visuals-0.5.3.jar
+          path: build/libs/Myst-Visuals-0.5.4.jar
           if-no-files-found: error
           compression-level: 0
           retention-days: 7
@@ -45,7 +45,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          VERSION="0.5.3"
+          VERSION="0.5.4"
           TAG="v${VERSION}"
           JAR="build/libs/Myst-Visuals-${VERSION}.jar"
           NOTES="Myst Visuals ${VERSION} for Minecraft Java 1.21.11. Fabric client-side visual mod. Built and archive-verified by GitHub Actions."
