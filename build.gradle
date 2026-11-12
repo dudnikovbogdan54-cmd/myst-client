@@ -39,3 +39,36 @@ java {
 tasks.withType(JavaCompile).configureEach {
     options.release = 21
 }
+
+sourceSets.main.resources.srcDir(layout.buildDirectory.dir('generated/mistResources'))
+
+tasks.register('generateMistTextures') {
+    outputs.dir(layout.buildDirectory.dir('generated/mistResources'))
+    doLast {
+        def root = layout.buildDirectory.dir('generated/mistResources').get().asFile
+        def target = new File(root, 'assets/mystclient/textures/gui/mist_background.png')
+        target.parentFile.mkdirs()
+        int size = 2048
+        def image = new java.awt.image.BufferedImage(size, size, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+        def random = new java.util.Random(0x4D495354L)
+        for (int yy = 0; yy < size; yy++) {
+            for (int xx = 0; xx < size; xx++) {
+                double nx = (xx - size * 0.5d) / size
+                double ny = (yy - size * 0.5d) / size
+                double glow = Math.max(0d, 1d - Math.sqrt(nx * nx * 1.8d + ny * ny * 1.8d) * 2.1d)
+                double diagonal = (Math.sin((xx + yy * 0.72d) * 0.012d) + 1d) * 0.5d
+                int grain = random.nextInt(256) - 128
+                int r = (int)Math.max(5, Math.min(255, 12 + glow * 45 + diagonal * 12 + grain * 0.10d))
+                int g = (int)Math.max(4, Math.min(255, 8 + glow * 23 + diagonal * 8 + grain * 0.07d))
+                int b = (int)Math.max(12, Math.min(255, 24 + glow * 82 + diagonal * 25 + grain * 0.16d))
+                int alpha = 255
+                image.setRGB(xx, yy, (alpha << 24) | (r << 16) | (g << 8) | b)
+            }
+        }
+        javax.imageio.ImageIO.write(image, 'png', target)
+    }
+}
+
+tasks.named('processResources') {
+    dependsOn tasks.named('generateMistTextures')
+}
