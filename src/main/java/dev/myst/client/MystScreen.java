@@ -113,7 +113,7 @@ public final class MystScreen extends Screen {
             }
             case MARKS -> {
                 heading(c,x,y,"MARKS","Личные метки и точки интереса");
-                feature(c,x,y+48,cw,"Waypoints","Сохранить текущую точку клавишей B","waypoints");
+                feature(c,x,y+48,cw,"Waypoints","ЛКМ: включить • ПКМ: список и настройки меток","waypoints");
                 feature(c,x+cw+gap,y+48,cw,"Death Marker","Личная метка места смерти","death_marker");
             }
             case UTILITIES -> {
@@ -185,6 +185,13 @@ public final class MystScreen extends Screen {
             if ((mx >= fieldX && mx <= fieldX + fieldW && my >= fieldY && my <= fieldY + 22)
                     || (mx >= fieldX && mx <= fieldX + fieldW && my >= fieldY + 38 && my <= fieldY + 60)) {
                 return super.mouseClicked(click, doubled);
+            }
+        }
+        if (click.button()==1 && page == Page.MARKS) {
+            int x=px+sw+26, y=py+82, available=pw-sw-52, cw=(available-14)/2;
+            if (mx>=x && mx<=x+cw && my>=y+48 && my<=y+126) {
+                client.setScreen(new WaypointScreen(this));
+                return true;
             }
         }
         if (click.button()==0) {
