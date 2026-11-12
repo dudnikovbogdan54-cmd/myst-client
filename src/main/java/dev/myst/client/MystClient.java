@@ -18,6 +18,7 @@ public final class MystClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         StreamerConfig.load();
+        MystUiConfig.load();
         MistConfig.load();
         MistHud.register();
         openMenu = KeyBindingHelper.registerKeyBinding(new KeyBinding(
