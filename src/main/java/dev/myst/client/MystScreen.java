@@ -17,7 +17,8 @@ public final class MystScreen extends Screen {
         MARKS("Marks", "Метки и точки"),
         UTILITIES("Utilities", "Инструменты"),
         STREAMER("Streamer", "Режим приватности"),
-        CONFIGS("Settings", "Размер и оформление меню");
+        CONFIGS("Settings", "Размер и оформление меню"),
+        VISUAL_LAB("Visual Lab", "Прицел, CPS и Target HUD");
 
         final String label, subtitle;
         Page(String label, String subtitle) { this.label = label; this.subtitle = subtitle; }
@@ -86,7 +87,7 @@ public final class MystScreen extends Screen {
                 list.add(new ModuleCard("target_hud","Target HUD","Информация о цели",true));
                 list.add(new ModuleCard("block_info","Block Info","Блок под прицелом",true));
                 list.add(new ModuleCard("keystrokes","Keystrokes","Отображение нажатий",true));
-                list.add(new ModuleCard("cps","CPS Counter","Счётчик кликов",false));
+                list.add(new ModuleCard("cps","CPS Counter","Счётчик кликов",true));
             }
             case VISUALS -> {
                 list.add(new ModuleCard("fullbright","Fullbright","Повышенная яркость мира",true));
@@ -113,6 +114,7 @@ public final class MystScreen extends Screen {
             case STREAMER -> {
                 list.add(new ModuleCard("streamer","Streamer Mode","Локальная замена ников в TAB",true));
             }
+            case VISUAL_LAB -> { }
             case CONFIGS -> {
                 list.add(new ModuleCard("default_profile","Default Profile","Базовый профиль",false));
                 list.add(new ModuleCard("auto_save","Auto Save","Автосохранение настроек",false));
@@ -122,10 +124,13 @@ public final class MystScreen extends Screen {
     }
 
     private boolean isEnabled(String id) {
-        return id.equals("streamer") ? StreamerConfig.enabled : MistConfig.enabled(id);
+        if (id.equals("streamer")) return StreamerConfig.enabled;
+        if (id.equals("cps")) return MystVisualConfig.cpsEnabled;
+        return MistConfig.enabled(id);
     }
 
     private void toggle(String id) {
+        if (id.equals("cps")) { MystVisualConfig.cpsEnabled = !MystVisualConfig.cpsEnabled; MystVisualConfig.save(); return; }
         if (id.equals("streamer")) {
             StreamerConfig.enabled = !StreamerConfig.enabled;
             StreamerConfig.save();
@@ -215,6 +220,26 @@ public final class MystScreen extends Screen {
             drawSmallButton(c, contentLeft, contentTop + 258 - scrollOffset, 142, "СОХРАНИТЬ НИК");
             c.drawTextWithShadow(textRenderer, "Замена действует только локально.", contentLeft + 154, contentTop + 266 - scrollOffset, MUTED);
         }
+        if (page == Page.VISUAL_LAB) {
+            int sy = contentTop + 10;
+            c.drawTextWithShadow(textRenderer, "CUSTOM CROSSHAIR", contentLeft, sy, WHITE);
+            drawSmallButton(c, contentLeft, sy + 18, 180, "СТИЛЬ: " + new String[]{"CLASSIC","DOT","PLUS","CIRCLE"}[MystVisualConfig.crosshairStyle]);
+            drawSmallButton(c, contentLeft + 190, sy + 18, 90, "ЦВЕТ");
+            c.drawTextWithShadow(textRenderer, "Размер: " + MystVisualConfig.crosshairSize, contentLeft, sy + 62, MUTED);
+            drawSmallButton(c, contentLeft + 170, sy + 54, 54, "−");
+            drawSmallButton(c, contentLeft + 230, sy + 54, 54, "+");
+            c.drawTextWithShadow(textRenderer, "Зазор: " + MystVisualConfig.crosshairGap, contentLeft, sy + 96, MUTED);
+            drawSmallButton(c, contentLeft + 170, sy + 88, 54, "−");
+            drawSmallButton(c, contentLeft + 230, sy + 88, 54, "+");
+            c.drawTextWithShadow(textRenderer, "Толщина: " + MystVisualConfig.crosshairThickness, contentLeft, sy + 130, MUTED);
+            drawSmallButton(c, contentLeft + 170, sy + 122, 54, "−");
+            drawSmallButton(c, contentLeft + 230, sy + 122, 54, "+");
+            c.drawTextWithShadow(textRenderer, "HUD MODULES", contentLeft, sy + 170, WHITE);
+            drawSmallButton(c, contentLeft, sy + 188, 180, MystVisualConfig.cpsEnabled ? "CPS COUNTER: ON" : "CPS COUNTER: OFF");
+            drawSmallButton(c, contentLeft + 190, sy + 188, 190, MystVisualConfig.cpsShowBoth ? "LMB + RMB" : "ТОЛЬКО LMB");
+            drawSmallButton(c, contentLeft, sy + 222, 180, MystVisualConfig.targetDistance ? "ДИСТАНЦИЯ: ON" : "ДИСТАНЦИЯ: OFF");
+            drawSmallButton(c, contentLeft + 190, sy + 222, 190, MystVisualConfig.targetSmoothBar ? "ПЛАВНОЕ HP: ON" : "ПЛАВНОЕ HP: OFF");
+        }
         if (page == Page.CONFIGS) {
             int sy = contentTop + 20;
             c.drawTextWithShadow(textRenderer, "ОФОРМЛЕНИЕ", contentLeft, sy, WHITE);
@@ -285,6 +310,29 @@ public final class MystScreen extends Screen {
                 return true;
             }
             if (mx >= px + pw - 46) { close(); return true; }
+        }
+        if (click.button() == 0 && page == Page.VISUAL_LAB) {
+            int left = px + sw + 24, sy = py + 74 + 10;
+            if (my >= sy + 18 && my <= sy + 43 && mx >= left && mx <= left + 180) MystVisualConfig.crosshairStyle = (MystVisualConfig.crosshairStyle + 1) % 4;
+            else if (my >= sy + 18 && my <= sy + 43 && mx >= left + 190 && mx <= left + 280) {
+                int[] colors = {0xFFF1E9FF, 0xFFB58AFF, 0xFF62D6E8, 0xFFFF8AB3, 0xFF8BE0A1, 0xFFFFD166};
+                int current = 0; for (int i=0;i<colors.length;i++) if(colors[i]==MystVisualConfig.crosshairColor) current=i;
+                MystVisualConfig.crosshairColor = colors[(current + 1) % colors.length];
+            } else if (my >= sy + 54 && my <= sy + 79 && mx >= left + 170 && mx <= left + 284) {
+                MystVisualConfig.crosshairSize = Math.max(3, Math.min(15, MystVisualConfig.crosshairSize + (mx < left + 225 ? -1 : 1)));
+            } else if (my >= sy + 88 && my <= sy + 113 && mx >= left + 170 && mx <= left + 284) {
+                MystVisualConfig.crosshairGap = Math.max(0, Math.min(9, MystVisualConfig.crosshairGap + (mx < left + 225 ? -1 : 1)));
+            } else if (my >= sy + 122 && my <= sy + 147 && mx >= left + 170 && mx <= left + 284) {
+                MystVisualConfig.crosshairThickness = Math.max(1, Math.min(4, MystVisualConfig.crosshairThickness + (mx < left + 225 ? -1 : 1)));
+            } else if (my >= sy + 188 && my <= sy + 213) {
+                if (mx >= left && mx <= left + 180) MystVisualConfig.cpsEnabled = !MystVisualConfig.cpsEnabled;
+                else if (mx >= left + 190 && mx <= left + 380) MystVisualConfig.cpsShowBoth = !MystVisualConfig.cpsShowBoth;
+            } else if (my >= sy + 222 && my <= sy + 247) {
+                if (mx >= left && mx <= left + 180) MystVisualConfig.targetDistance = !MystVisualConfig.targetDistance;
+                else if (mx >= left + 190 && mx <= left + 380) MystVisualConfig.targetSmoothBar = !MystVisualConfig.targetSmoothBar;
+            } else return super.mouseClicked(click, doubled);
+            MystVisualConfig.save();
+            return true;
         }
         if (click.button() == 0 && page == Page.CONFIGS) {
             int contentLeft = px + sw + 24, sy = py + 74 + 20;
