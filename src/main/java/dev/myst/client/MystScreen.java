@@ -161,7 +161,7 @@ public final class MystScreen extends Screen {
             boolean active = p == page;
             if (active) {
                 c.fill(px + 9, y - 4, px + sw - 9, y + 25, 0xFF332445);
-                c.fill(px + 9, y - 4, px + 12, y + 27, PURPLE);
+                c.fill(px + 9, y - 4, px + 12, y + 25, accent());
             }
             c.drawTextWithShadow(textRenderer, p.label, px + 21, y + 5, active ? WHITE : MUTED);
         }
