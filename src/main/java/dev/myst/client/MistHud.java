@@ -13,6 +13,10 @@ public final class MistHud {
     private static java.util.UUID trackedTarget;
     private static float previousHealth = -1.0F;
     private static long killEffectUntil;
+    private static boolean lastAttackPressed, lastUsePressed;
+    private static int leftClicks, rightClicks, shownLeftCps, shownRightCps;
+    private static long cpsWindowStart = System.currentTimeMillis();
+    private static float displayedTargetHealth = -1.0F;
     private MistHud() {}
 
     public static void register() {
@@ -46,15 +50,28 @@ public final class MistHud {
                 ctx.drawTextWithShadow(mc.textRenderer, "Ping  " + entry.getLatency() + " ms", 14, y + 5, 0xFFF1E9FF);
             }
         }
+        if (MystVisualConfig.cpsEnabled) {
+            String cpsText = MystVisualConfig.cpsShowBoth
+                    ? "LMB " + shownLeftCps + "  |  RMB " + shownRightCps
+                    : "LMB " + shownLeftCps;
+            int cpsWidth = mc.textRenderer.getWidth(cpsText) + 14;
+            panel(ctx, 8, y, cpsWidth, 20);
+            ctx.drawTextWithShadow(mc.textRenderer, cpsText, 14, y + 6, 0xFFF1E9FF);
+            y += 24;
+        }
         if (MistConfig.enabled("target_hud") && mc.targetedEntity instanceof LivingEntity target && target.isAlive()) {
             int x = ctx.getScaledWindowWidth() / 2 + 12;
             int ty = ctx.getScaledWindowHeight() / 2 + 8;
             panel(ctx, x, ty, 138, 38);
-            ctx.drawTextWithShadow(mc.textRenderer, target.getName().getString(), x + 7, ty + 6, 0xFFF1E9FF);
+            String targetName = target.getName().getString();
+            if (MystVisualConfig.targetDistance) targetName += String.format(java.util.Locale.ROOT, "  %.1fm", mc.player.distanceTo(target));
+            ctx.drawTextWithShadow(mc.textRenderer, targetName, x + 7, ty + 6, 0xFFF1E9FF);
             float max = Math.max(1.0F, target.getMaxHealth());
-            float ratio = Math.max(0.0F, Math.min(1.0F, target.getHealth() / max));
+            float actual = Math.max(0.0F, Math.min(1.0F, target.getHealth() / max));
+            if (displayedTargetHealth < 0) displayedTargetHealth = actual;
+            displayedTargetHealth = MystVisualConfig.targetSmoothBar ? displayedTargetHealth + (actual - displayedTargetHealth) * 0.22F : actual;
             ctx.fill(x + 7, ty + 23, x + 131, ty + 29, 0xFF45384F);
-            ctx.fill(x + 7, ty + 23, x + 7 + (int)(124 * ratio), ty + 29, PURPLE);
+            ctx.fill(x + 7, ty + 23, x + 7 + (int)(124 * displayedTargetHealth), ty + 29, MystUiConfig.accent());
             ctx.drawTextWithShadow(mc.textRenderer, String.format(java.util.Locale.ROOT, "%.1f / %.1f HP", target.getHealth(), max), x + 7, ty + 31, 0xFFD9CDEB);
         }
         if (MistConfig.enabled("block_info") && mc.crosshairTarget instanceof BlockHitResult hit && hit.getType() == HitResult.Type.BLOCK) {
@@ -89,12 +106,28 @@ public final class MistHud {
     private static void drawCrosshair(DrawContext ctx) {
         int cx = ctx.getScaledWindowWidth() / 2;
         int cy = ctx.getScaledWindowHeight() / 2;
-        int color = 0xFFE7D5FF;
-        ctx.fill(cx - 1, cy - 7, cx + 1, cy - 3, color);
-        ctx.fill(cx - 1, cy + 3, cx + 1, cy + 7, color);
-        ctx.fill(cx - 7, cy - 1, cx - 3, cy + 1, color);
-        ctx.fill(cx + 3, cy - 1, cx + 7, cy + 1, color);
-        ctx.fill(cx - 1, cy - 1, cx + 1, cy + 1, PURPLE);
+        int size = MystVisualConfig.crosshairSize, gap = MystVisualConfig.crosshairGap;
+        int t = MystVisualConfig.crosshairThickness, color = MystVisualConfig.crosshairColor;
+        switch (MystVisualConfig.crosshairStyle) {
+            case 1 -> ctx.fill(cx - t, cy - t, cx + t + 1, cy + t + 1, color);
+            case 2 -> {
+                ctx.fill(cx - t, cy - size, cx + t + 1, cy + size + 1, color);
+                ctx.fill(cx - size, cy - t, cx + size + 1, cy + t + 1, color);
+            }
+            case 3 -> {
+                int r = size;
+                ctx.fill(cx - r, cy - r, cx - r + t, cy - r + t, color);
+                ctx.fill(cx + r - t, cy - r, cx + r, cy - r + t, color);
+                ctx.fill(cx - r, cy + r - t, cx - r + t, cy + r, color);
+                ctx.fill(cx + r - t, cy + r - t, cx + r, cy + r, color);
+            }
+            default -> {
+                ctx.fill(cx - t / 2, cy - gap - size, cx + (t + 1) / 2, cy - gap, color);
+                ctx.fill(cx - t / 2, cy + gap + 1, cx + (t + 1) / 2, cy + gap + size + 1, color);
+                ctx.fill(cx - gap - size, cy - t / 2, cx - gap, cy + (t + 1) / 2, color);
+                ctx.fill(cx + gap + 1, cy - t / 2, cx + gap + size + 1, cy + (t + 1) / 2, color);
+            }
+        }
     }
 
     private static void drawKeystrokes(DrawContext ctx, MinecraftClient mc) {
@@ -131,6 +164,17 @@ public final class MistHud {
 
     public static void tick() {
         MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player != null) {
+            boolean attack = mc.options.attackKey.isPressed(), use = mc.options.useKey.isPressed();
+            if (attack && !lastAttackPressed) leftClicks++;
+            if (use && !lastUsePressed) rightClicks++;
+            lastAttackPressed = attack; lastUsePressed = use;
+            long now = System.currentTimeMillis();
+            if (now - cpsWindowStart >= 1000L) {
+                shownLeftCps = leftClicks; shownRightCps = rightClicks;
+                leftClicks = rightClicks = 0; cpsWindowStart = now;
+            }
+        } else lastAttackPressed = lastUsePressed = false;
         if (mc.player == null || mc.targetedEntity == null) {
             trackedTarget = null;
             previousHealth = -1.0F;
