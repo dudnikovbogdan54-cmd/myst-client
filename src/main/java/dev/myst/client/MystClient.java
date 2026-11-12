@@ -10,6 +10,9 @@ import org.lwjgl.glfw.GLFW;
 public final class MystClient implements ClientModInitializer {
     public static final String MOD_ID = "mystclient";
     private static KeyBinding openMenu;
+    private static KeyBinding zoomKey;
+    private static Integer previousFov;
+    private static boolean zooming;
 
     @Override
     public void onInitializeClient() {
@@ -19,8 +22,22 @@ public final class MystClient implements ClientModInitializer {
         openMenu = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.mystclient.menu", InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT_SHIFT, KeyBinding.Category.MISC));
+        zoomKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.mystclient.zoom", InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_C, KeyBinding.Category.MISC));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             MistHud.tick();
+            if (MistConfig.enabled("zoom") && zoomKey.isPressed()) {
+                if (!zooming) {
+                    previousFov = client.options.getFov().getValue();
+                    zooming = true;
+                }
+                client.options.getFov().setValue(Math.max(20, Math.min(35, previousFov == null ? 70 : previousFov / 2)));
+            } else if (zooming) {
+                if (previousFov != null) client.options.getFov().setValue(previousFov);
+                previousFov = null;
+                zooming = false;
+            }
             while (openMenu.wasPressed()) client.setScreen(new MystScreen());
         });
     }
