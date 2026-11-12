@@ -49,3 +49,9 @@ No through-wall player ESP, x-ray, or server-side modifications are included.
 - Waypoints store their dimension so markers do not appear in a different dimension.
 - Kill Effect is now a world-space particle burst at the tracked target location instead of a flat screen overlay.
 - Menu navigation hitboxes now match the visible sidebar spacing; cards and active navigation have clearer accent/status styling.
+
+
+## Myst Visuals 0.5.6
+- Rebuilt the ClickGUI with responsive one/two-column layouts, rounded panels and controls, aligned switches, text truncation and consistent spacing.
+- Added Direction and Speed HUD widgets.
+- Streamer nickname fields are aligned with their labels and save control.
