@@ -64,16 +64,22 @@ public final class MistHud {
             panel(ctx, x, by, Math.min(190, mc.textRenderer.getWidth(name) + 18), 20);
             ctx.drawTextWithShadow(mc.textRenderer, name, x + 8, by + 6, 0xFFF1E9FF);
         }
-        if (MistConfig.enabled("waypoints") && MistConfig.waypointSet) {
-            double dx = MistConfig.waypointX - mc.player.getX();
-            double dy = MistConfig.waypointY - mc.player.getY();
-            double dz = MistConfig.waypointZ - mc.player.getZ();
-            int distance = (int)Math.round(Math.sqrt(dx * dx + dy * dy + dz * dz));
-            String label = "WAYPOINT  " + (int)MistConfig.waypointX + " " + (int)MistConfig.waypointY + " " + (int)MistConfig.waypointZ + "  (" + distance + "m)";
-            int w = mc.textRenderer.getWidth(label) + 16;
-            int x = ctx.getScaledWindowWidth() - w - 8;
-            panel(ctx, x, 8, w, 20);
-            ctx.drawTextWithShadow(mc.textRenderer, label, x + 8, 14, PURPLE);
+        if (MistConfig.enabled("waypoints")) {
+            int markY = 8;
+            for (MistConfig.Waypoint point : MistConfig.waypoints) {
+                if (!point.enabled) continue;
+                double dx = point.x - mc.player.getX();
+                double dy = point.y - mc.player.getY();
+                double dz = point.z - mc.player.getZ();
+                int distance = (int)Math.round(Math.sqrt(dx * dx + dy * dy + dz * dz));
+                String label = point.name + "  " + (int)point.x + " " + (int)point.y + " " + (int)point.z
+                        + (point.showDistance ? "  (" + distance + "m)" : "");
+                int w = mc.textRenderer.getWidth(label) + 16;
+                int x = ctx.getScaledWindowWidth() - w - 8;
+                panel(ctx, x, markY, w, 20);
+                ctx.drawTextWithShadow(mc.textRenderer, label, x + 8, markY + 6, point.color);
+                markY += 24;
+            }
         }
         if (MistConfig.enabled("crosshair")) drawCrosshair(ctx);
         if (MistConfig.enabled("keystrokes")) drawKeystrokes(ctx, mc);
