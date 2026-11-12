@@ -55,7 +55,7 @@ public final class MystScreen extends Screen {
         alias = null;
         if (page == Page.STREAMER) {
             int x = px + sw + 22;
-            int y = py + 270 - scrollOffset;
+            int y = py + 170 - scrollOffset;
             int w = Math.min(340, pw - sw - 44);
             original = new TextFieldWidget(textRenderer, x, y, w, 20, Text.literal("Original nickname"));
             original.setPlaceholder(Text.literal("Настоящий ник"));
@@ -439,6 +439,7 @@ public final class MystScreen extends Screen {
             pw = Math.min(700, width - 16); ph = Math.min(430, height - 16);
             MystUiConfig.theme = 0; MystUiConfig.compact = true;
             MystUiConfig.width = pw; MystUiConfig.height = ph;
+            MystUiConfig.save(); rebuild(); return true;
         } else return false;
         MystUiConfig.save(); clampScroll(); return true;
     }
