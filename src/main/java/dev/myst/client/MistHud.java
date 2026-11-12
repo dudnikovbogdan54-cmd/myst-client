@@ -64,6 +64,17 @@ public final class MistHud {
             panel(ctx, x, by, Math.min(190, mc.textRenderer.getWidth(name) + 18), 20);
             ctx.drawTextWithShadow(mc.textRenderer, name, x + 8, by + 6, 0xFFF1E9FF);
         }
+        if (MistConfig.enabled("waypoints") && MistConfig.waypointSet) {
+            double dx = MistConfig.waypointX - mc.player.getX();
+            double dy = MistConfig.waypointY - mc.player.getY();
+            double dz = MistConfig.waypointZ - mc.player.getZ();
+            int distance = (int)Math.round(Math.sqrt(dx * dx + dy * dy + dz * dz));
+            String label = "WAYPOINT  " + (int)MistConfig.waypointX + " " + (int)MistConfig.waypointY + " " + (int)MistConfig.waypointZ + "  (" + distance + "m)";
+            int w = mc.textRenderer.getWidth(label) + 16;
+            int x = ctx.getScaledWindowWidth() - w - 8;
+            panel(ctx, x, 8, w, 20);
+            ctx.drawTextWithShadow(mc.textRenderer, label, x + 8, 14, PURPLE);
+        }
         if (MistConfig.enabled("crosshair")) drawCrosshair(ctx);
         if (MistConfig.enabled("keystrokes")) drawKeystrokes(ctx, mc);
         if (MistConfig.enabled("kill_effect") && System.currentTimeMillis() < killEffectUntil) drawKillEffect(ctx);
