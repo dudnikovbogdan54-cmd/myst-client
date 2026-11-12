@@ -7,7 +7,7 @@ Original client-side Fabric visual mod by **Aloxmyst_YT** for Minecraft Java **1
 - **HUD:** watermark, FPS, XYZ coordinates, server ping, Target HUD, block name.
 - **Visuals:** custom crosshair and Fullbright using the 1.21.11 lightmap brightness hooks.
 - **Effects:** a brief purple decorative frame when the currently targeted living entity is defeated.
-- **Marks:** one saved personal waypoint. Press **B** in-world to save your current coordinates; when Waypoints is enabled, the HUD shows its coordinates and live distance.
+- **Marks / Waypoints:** multiple personal waypoints with exact editable X/Y/Z coordinates, custom names, six colors, per-waypoint enable/disable and optional distance display. Waypoints are saved locally.
 - **Utilities:** hold **C** for temporary zoom when Zoom is enabled; Keystrokes displays W/A/S/D and mouse buttons.
 - **Streamer Mode:** local player-name aliases in the TAB list. Aliases are only visible on this client.
 - Module switches and waypoint data are saved under the Minecraft `config` directory.
@@ -16,9 +16,10 @@ Original client-side Fabric visual mod by **Aloxmyst_YT** for Minecraft Java **1
 ## Controls
 
 - **Right Shift** — open the menu.
-- **B** — save/update the personal waypoint.
+- **B** — add a waypoint at your exact current player coordinates.
 - **C (hold)** — temporary zoom, when enabled.
-- Click implemented module cards to toggle them.
+- On the **Marks** page, left-click the Waypoints card to toggle the module; right-click it to open the waypoint manager.
+- In the waypoint manager, enter a name and exact X/Y/Z, then save. Left-click a listed waypoint to enable/disable it; right-click it to load its settings for editing. You can toggle its distance display, cycle its color, add a point at your current location, or delete the selected point.
 
 ## Compatibility
 
@@ -27,7 +28,7 @@ Original client-side Fabric visual mod by **Aloxmyst_YT** for Minecraft Java **1
 - Fabric API for 1.21.11
 - Java 21+ at runtime
 
-The project is built by GitHub Actions using JDK 25 and targets Java 21 bytecode. The CI job checks archive contents and requires a JAR size of at least 5 MiB. Successful CI compilation does not prove runtime compatibility on every launcher or Android device; MojoLauncher still needs an in-game test.
+The project is built by GitHub Actions using JDK 25 and targets Java 21 bytecode. CI checks archive contents and requires a JAR size of at least 5 MiB. Successful CI compilation does not prove runtime compatibility on every launcher or Android device; MojoLauncher still needs an in-game test.
 
 ## Not implemented yet
 
