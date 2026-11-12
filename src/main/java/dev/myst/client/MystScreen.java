@@ -7,244 +7,201 @@ import net.minecraft.text.Text;
 
 public final class MystScreen extends Screen {
     private enum Page {
-        HUD("HUD"), VISUALS("Visuals"), MARKS("Marks"),
+        HUD("HUD"), VISUALS("Visuals"), EFFECTS("Effects"), MARKS("Marks"),
         UTILITIES("Utilities"), STREAMER("Streamer"), CONFIGS("Configs");
-
         final String label;
         Page(String label) { this.label = label; }
     }
 
     private Page page = Page.HUD;
-    private TextFieldWidget original;
-    private TextFieldWidget alias;
-    private int panelX, panelY, panelW, panelH, sideW;
-    private static final int BG = 0xF00B0914;
-    private static final int PANEL = 0xF0141021;
-    private static final int CARD = 0xE91D172B;
-    private static final int CARD_ALT = 0xE9231A34;
-    private static final int PURPLE = 0xFF9B6CFF;
-    private static final int PURPLE_DARK = 0xFF7042C8;
-    private static final int TEXT = 0xFFF2ECFF;
-    private static final int MUTED = 0xFF9D91AD;
+    private TextFieldWidget original, alias;
+    private int px, py, pw, ph, sw;
+    private static final int PANEL = 0xF0141021, CARD = 0xE91D172B;
+    private static final int PURPLE = 0xFFB58AFF, DARK = 0xFF7042C8;
+    private static final int WHITE = 0xFFF2ECFF, MUTED = 0xFF9D91AD;
 
-    public MystScreen() {
-        super(Text.literal("Mist Visuals"));
-    }
+    public MystScreen() { super(Text.literal("Mist Visuals")); }
 
     @Override
     protected void init() {
-        panelW = Math.min(980, width - 32);
-        panelH = Math.min(590, height - 32);
-        panelX = (width - panelW) / 2;
-        panelY = (height - panelH) / 2;
-        sideW = Math.max(150, Math.min(190, panelW / 5));
-
-        original = null;
-        alias = null;
+        pw = Math.min(980, width - 24);
+        ph = Math.min(590, height - 24);
+        px = (width - pw) / 2; py = (height - ph) / 2;
+        sw = Math.max(132, Math.min(184, pw / 5));
+        original = null; alias = null;
         if (page == Page.STREAMER) {
-            int x = panelX + sideW + 34;
-            int y = panelY + 248;
-            int w = Math.min(360, panelW - sideW - 70);
+            int x = px + sw + 30, y = py + 258, w = Math.min(360, pw - sw - 60);
             original = new TextFieldWidget(textRenderer, x, y, w, 22, Text.literal("Original nickname"));
             original.setPlaceholder(Text.literal("Настоящий ник"));
-            alias = new TextFieldWidget(textRenderer, x, y + 34, w, 22, Text.literal("Display nickname"));
+            alias = new TextFieldWidget(textRenderer, x, y + 38, w, 22, Text.literal("Display nickname"));
             alias.setPlaceholder(Text.literal("Как показывать"));
-            addDrawableChild(original);
-            addDrawableChild(alias);
+            addDrawableChild(original); addDrawableChild(alias);
         }
     }
 
     private void select(Page next) {
-        if (page == next) return;
-        page = next;
-        clearChildren();
-        init();
+        if (page != next) { page = next; clearChildren(); init(); }
     }
 
     @Override
-    public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
-        ctx.fill(0, 0, width, height, 0xD9080610);
-        ctx.fill(panelX, panelY, panelX + panelW, panelY + panelH, PANEL);
-        ctx.fill(panelX, panelY, panelX + sideW, panelY + panelH, 0xFF100C1B);
-        ctx.fill(panelX + sideW, panelY + 62, panelX + panelW, panelY + 63, 0xFF30243D);
-        ctx.fill(panelX + sideW - 1, panelY, panelX + sideW, panelY + panelH, 0xFF30243D);
+    public void render(DrawContext c, int mx, int my, float delta) {
+        c.fill(0, 0, width, height, 0xD9080610);
+        c.fill(px, py, px + pw, py + ph, PANEL);
+        c.fill(px, py, px + sw, py + ph, 0xFF100C1B);
+        c.fill(px + sw - 1, py, px + sw, py + ph, 0xFF30243D);
+        c.fill(px + sw, py + 62, px + pw, py + 63, 0xFF30243D);
 
-        // Brand mark and sidebar
-        ctx.fill(panelX + 22, panelY + 20, panelX + 58, panelY + 56, PURPLE_DARK);
-        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("MV"), panelX + 40, panelY + 33, TEXT);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("MIST"), panelX + 68, panelY + 24, TEXT);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("VISUALS"), panelX + 68, panelY + 37, PURPLE);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("CLIENT INTERFACE"), panelX + 22, panelY + 82, MUTED);
+        c.fill(px + 20, py + 18, px + 56, py + 54, DARK);
+        c.drawCenteredTextWithShadow(textRenderer, "MV", px + 38, py + 31, WHITE);
+        c.drawTextWithShadow(textRenderer, "MIST", px + 66, py + 22, WHITE);
+        c.drawTextWithShadow(textRenderer, "VISUALS", px + 66, py + 36, PURPLE);
+        c.drawTextWithShadow(textRenderer, "CLIENT MODULES", px + 20, py + 76, MUTED);
 
-        int navY = panelY + 108;
-        for (Page item : Page.values()) {
-            boolean active = item == page;
-            int y = navY + item.ordinal() * 43;
+        int navY = py + 100;
+        for (Page p : Page.values()) {
+            int y = navY + p.ordinal() * 42;
+            boolean active = p == page;
             if (active) {
-                ctx.fill(panelX + 12, y - 5, panelX + sideW - 12, y + 28, 0xFF392653);
-                ctx.fill(panelX + 12, y - 5, panelX + 15, y + 28, PURPLE);
+                c.fill(px + 10, y - 4, px + sw - 10, y + 27, 0xFF392653);
+                c.fill(px + 10, y - 4, px + 13, y + 27, PURPLE);
             }
-            ctx.drawTextWithShadow(textRenderer, Text.literal(icon(item) + "  " + item.label),
-                    panelX + 25, y + 6, active ? TEXT : MUTED);
+            c.drawTextWithShadow(textRenderer, p.label, px + 23, y + 6, active ? WHITE : MUTED);
         }
 
-        ctx.drawTextWithShadow(textRenderer, Text.literal("MIST VISUALS  /  " + page.label.toUpperCase()),
-                panelX + sideW + 28, panelY + 24, TEXT);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("MV  •  CLIENT SETTINGS"),
-                panelX + sideW + 28, panelY + 42, MUTED);
-        ctx.fill(panelX + panelW - 46, panelY + 18, panelX + panelW - 18, panelY + 46, 0xFF2A2037);
-        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("×"),
-                panelX + panelW - 32, panelY + 27, TEXT);
+        c.drawTextWithShadow(textRenderer, "MIST VISUALS  /  " + page.label.toUpperCase(),
+                px + sw + 26, py + 22, WHITE);
+        c.drawTextWithShadow(textRenderer, "MV  •  CLIENT SETTINGS", px + sw + 26, py + 40, MUTED);
+        c.fill(px + pw - 44, py + 16, px + pw - 16, py + 44, 0xFF2A2037);
+        c.drawCenteredTextWithShadow(textRenderer, "×", px + pw - 30, py + 24, WHITE);
 
-        drawPage(ctx);
-        super.render(ctx, mouseX, mouseY, delta);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("MIST VISUALS  •  1.21.11"),
-                panelX + 20, panelY + panelH - 24, 0xFF756A82);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("OWNER  ALOXMYST_YT"),
-                panelX + sideW + 28, panelY + panelH - 24, 0xFF756A82);
+        drawPage(c);
+        super.render(c, mx, my, delta);
+        c.drawTextWithShadow(textRenderer, "MIST VISUALS  •  1.21.11", px + 18, py + ph - 20, 0xFF756A82);
+        c.drawTextWithShadow(textRenderer, "OWNER  ALOXMYST_YT", px + sw + 26, py + ph - 20, 0xFF756A82);
     }
 
-    private void drawPage(DrawContext ctx) {
-        int x = panelX + sideW + 28;
-        int y = panelY + 88;
-        int available = panelW - sideW - 56;
-        int gap = 18;
-        int cardW = (available - gap) / 2;
-
+    private void drawPage(DrawContext c) {
+        int x = px + sw + 26, y = py + 82, gap = 14;
+        int available = pw - sw - 52, cw = (available - gap) / 2;
         switch (page) {
             case HUD -> {
-                heading(ctx, x, y, "HUD", "Настрой элементы интерфейса на экране");
-                card(ctx, x, y + 48, cardW, 92, "Watermark", "Компактный логотип Mist Visuals", "В РАЗРАБОТКЕ");
-                card(ctx, x + cardW + gap, y + 48, cardW, 92, "FPS Counter", "Отображение текущего FPS", "В РАЗРАБОТКЕ");
-                card(ctx, x, y + 154, cardW, 92, "Coordinates", "Координаты игрока XYZ", "В РАЗРАБОТКЕ");
-                card(ctx, x + cardW + gap, y + 154, cardW, 92, "Ping Display", "Задержка соединения", "В РАЗРАБОТКЕ");
-                card(ctx, x, y + 260, cardW, 92, "Keystrokes", "Подсветка нажатий клавиш", "В РАЗРАБОТКЕ");
-                card(ctx, x + cardW + gap, y + 260, cardW, 92, "CPS Counter", "Счётчик кликов в секунду", "В РАЗРАБОТКЕ");
+                heading(c, x, y, "HUD", "Экранные элементы — включай нужные и отключай лишние");
+                feature(c,x,y+48,cw,"Watermark","Логотип Mist Visuals","watermark");
+                feature(c,x+cw+gap,y+48,cw,"FPS Counter","Текущая частота кадров","fps");
+                feature(c,x,y+142,cw,"Coordinates","Координаты XYZ игрока","coords");
+                feature(c,x+cw+gap,y+142,cw,"Ping Display","Задержка соединения","ping");
+                feature(c,x,y+236,cw,"Target HUD","Здоровье существа под прицелом","target_hud");
+                feature(c,x+cw+gap,y+236,cw,"Block Info","Название блока под прицелом","block_info");
             }
             case VISUALS -> {
-                heading(ctx, x, y, "VISUALS", "Визуальные эффекты и оформление");
-                card(ctx, x, y + 48, cardW, 92, "Custom Crosshair", "Настраиваемый прицел", "В РАЗРАБОТКЕ");
-                card(ctx, x + cardW + gap, y + 48, cardW, 92, "Hit Color", "Цветовая индикация попаданий", "В РАЗРАБОТКЕ");
-                card(ctx, x, y + 154, cardW, 92, "Particles", "Настройка визуальных частиц", "В РАЗРАБОТКЕ");
-                card(ctx, x + cardW + gap, y + 154, cardW, 92, "Animations", "Плавность анимаций интерфейса", "В РАЗРАБОТКЕ");
+                heading(c,x,y,"VISUALS","Визуальные настройки мира и интерфейса");
+                feature(c,x,y+48,cw,"Block Overlay","Подсветка выбранного блока","block_overlay");
+                feature(c,x+cw+gap,y+48,cw,"Custom Crosshair","Настраиваемый прицел","crosshair");
+                feature(c,x,y+142,cw,"Fullbright","Повышенная яркость мира","fullbright");
+                feature(c,x+cw+gap,y+142,cw,"Clear Weather FX","Снижение визуального шума погоды","weather_fx");
+            }
+            case EFFECTS -> {
+                heading(c,x,y,"EFFECTS","Локальные визуальные эффекты событий");
+                feature(c,x,y+48,cw,"Kill Effect","Декоративный эффект после победы","kill_effect");
+                feature(c,x+cw+gap,y+48,cw,"Hit Particles","Настройка декоративных частиц","hit_particles");
+                feature(c,x,y+142,cw,"Totem Pop FX","Оформление эффекта тотема","totem_fx");
+                feature(c,x+cw+gap,y+142,cw,"Animations","Плавность интерфейсных анимаций","animations");
             }
             case MARKS -> {
-                heading(ctx, x, y, "MARKS", "Метки и визуальные индикаторы");
-                card(ctx, x, y + 48, cardW, 92, "Target Marker", "Индикатор выбранной цели", "В РАЗРАБОТКЕ");
-                card(ctx, x + cardW + gap, y + 48, cardW, 92, "Waypoints", "Личные метки местности", "В РАЗРАБОТКЕ");
-                card(ctx, x, y + 154, cardW, 92, "Damage Indicator", "Числовые индикаторы урона", "В РАЗРАБОТКЕ");
+                heading(c,x,y,"MARKS","Личные метки и точки интереса");
+                feature(c,x,y+48,cw,"Waypoints","Сохранённые точки на карте","waypoints");
+                feature(c,x+cw+gap,y+48,cw,"Death Marker","Личная метка места смерти","death_marker");
             }
             case UTILITIES -> {
-                heading(ctx, x, y, "UTILITIES", "Удобные инструменты клиента");
-                card(ctx, x, y + 48, cardW, 92, "Zoom", "Плавное приближение камеры", "В РАЗРАБОТКЕ");
-                card(ctx, x + cardW + gap, y + 48, cardW, 92, "Fullbright", "Настройка яркости изображения", "В РАЗРАБОТКЕ");
-                card(ctx, x, y + 154, cardW, 92, "Auto Messages", "Быстрые текстовые шаблоны", "В РАЗРАБОТКЕ");
+                heading(c,x,y,"UTILITIES","Инструменты комфорта");
+                feature(c,x,y+48,cw,"Zoom","Приближение камеры","zoom");
+                feature(c,x+cw+gap,y+48,cw,"Keystrokes","Отображение нажатий клавиш","keystrokes");
+                feature(c,x,y+142,cw,"CPS Counter","Счётчик кликов","cps");
             }
             case STREAMER -> {
-                heading(ctx, x, y, "STREAMER MODE", "Локальная замена отображаемых ников в TAB");
-                int w = Math.min(420, available);
-                ctx.fill(x, y + 48, x + w, y + 88, CARD);
-                ctx.drawTextWithShadow(textRenderer, Text.literal("Streamer Mode"), x + 16, y + 62, TEXT);
-                boolean enabled = StreamerConfig.enabled;
-                ctx.fill(x + w - 90, y + 57, x + w - 16, y + 81, enabled ? 0xFF6541A4 : 0xFF403849);
-                ctx.drawCenteredTextWithShadow(textRenderer, Text.literal(enabled ? "ON" : "OFF"),
-                        x + w - 53, y + 65, TEXT);
-                ctx.drawTextWithShadow(textRenderer, Text.literal("Добавь соответствие настоящего и отображаемого ника."),
-                        x, y + 120, MUTED);
-                if (original != null && alias != null) {
-                    ctx.drawTextWithShadow(textRenderer, Text.literal("НАСТОЯЩИЙ НИК"), x, y + 145, MUTED);
-                    ctx.drawTextWithShadow(textRenderer, Text.literal("ОТОБРАЖАЕМЫЙ НИК"), x, y + 179, MUTED);
-                    int by = y + 218;
-                    ctx.fill(x, by, x + 150, by + 30, PURPLE_DARK);
-                    ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("СОХРАНИТЬ НИК"),
-                            x + 75, by + 10, TEXT);
-                    ctx.drawTextWithShadow(textRenderer, Text.literal("Замены видны только на твоём клиенте."),
-                            x, by + 48, MUTED);
-                }
+                heading(c,x,y,"STREAMER MODE","Локальная приватность отображения");
+                feature(c,x,y+48,Math.min(430,available),"Streamer Mode","Замена ников в TAB только на этом клиенте","streamer");
+                c.drawTextWithShadow(textRenderer,"НАСТОЯЩИЙ НИК",x,y+145,MUTED);
+                c.drawTextWithShadow(textRenderer,"КАК ПОКАЗЫВАТЬ",x,y+184,MUTED);
+                c.fill(x,y+228,x+150,y+258,DARK);
+                c.drawCenteredTextWithShadow(textRenderer,"СОХРАНИТЬ НИК",x+75,y+238,WHITE);
+                c.drawTextWithShadow(textRenderer,"Замены не меняют аккаунты и серверные ники.",x,y+278,MUTED);
             }
             case CONFIGS -> {
-                heading(ctx, x, y, "CONFIGS", "Управление настройками Mist Visuals");
-                card(ctx, x, y + 48, cardW, 92, "Default Profile", "Базовый профиль клиента", "АКТИВЕН");
-                card(ctx, x + cardW + gap, y + 48, cardW, 92, "Export / Import", "Перенос конфигураций", "СКОРО");
-                ctx.drawTextWithShadow(textRenderer, Text.literal("Настройки Streamer Mode сохраняются автоматически."),
-                        x, y + 170, MUTED);
+                heading(c,x,y,"CONFIGS","Профили и сохранение настроек");
+                feature(c,x,y+48,cw,"Default Profile","Базовый набор настроек","default_profile");
+                feature(c,x+cw+gap,y+48,cw,"Auto Save","Автоматическое сохранение модулей","auto_save");
+                c.drawTextWithShadow(textRenderer,"Конфигурация хранится локально в папке config.",x,y+160,MUTED);
             }
         }
     }
 
-    private void heading(DrawContext ctx, int x, int y, String title, String subtitle) {
-        ctx.drawTextWithShadow(textRenderer, Text.literal(title), x, y, PURPLE);
-        ctx.drawTextWithShadow(textRenderer, Text.literal(subtitle), x, y + 19, MUTED);
+    private void heading(DrawContext c,int x,int y,String title,String subtitle) {
+        c.drawTextWithShadow(textRenderer,title,x,y,PURPLE);
+        c.drawTextWithShadow(textRenderer,subtitle,x,y+18,MUTED);
     }
 
-    private void card(DrawContext ctx, int x, int y, int w, int h, String title, String desc, String state) {
-        ctx.fill(x, y, x + w, y + h, CARD);
-        ctx.fill(x, y, x + 3, y + h, 0xFF594078);
-        ctx.drawTextWithShadow(textRenderer, Text.literal(title), x + 16, y + 17, TEXT);
-        ctx.drawTextWithShadow(textRenderer, Text.literal(desc), x + 16, y + 39, MUTED);
-        int sw = textRenderer.getWidth(state);
-        ctx.drawTextWithShadow(textRenderer, Text.literal(state), x + w - sw - 14, y + h - 22,
-                state.equals("АКТИВЕН") ? PURPLE : 0xFF897C98);
+    private void feature(DrawContext c,int x,int y,int w,String title,String desc,String id) {
+        boolean on = id.equals("streamer") ? StreamerConfig.enabled : MistConfig.enabled(id);
+        c.fill(x,y,x+w,y+78,CARD);
+        c.fill(x,y,x+3,y+78,0xFF594078);
+        c.drawTextWithShadow(textRenderer,title,x+14,y+14,WHITE);
+        c.drawTextWithShadow(textRenderer,desc,x+14,y+36,MUTED);
+        int sx=x+w-58;
+        c.fill(sx,y+12,sx+42,y+32,on?0xFF8255C5:0xFF403849);
+        c.fill(on?sx+23:sx+3,y+14,on?sx+39:sx+19,y+30,WHITE);
+        c.drawTextWithShadow(textRenderer,on?"ON":"OFF",sx-28,y+18,on?PURPLE:MUTED);
     }
 
-    private String icon(Page p) {
-        return switch (p) {
-            case HUD -> "▣";
-            case VISUALS -> "◈";
-            case MARKS -> "⚑";
-            case UTILITIES -> "✧";
-            case STREAMER -> "◎";
-            case CONFIGS -> "☷";
-        };
+    private void toggleAt(double mx,double my,int x,int y,int w,String id) {
+        if (mx>=x && mx<=x+w && my>=y && my<=y+78) {
+            if (id.equals("streamer")) { StreamerConfig.enabled=!StreamerConfig.enabled; StreamerConfig.save(); }
+            else MistConfig.toggle(id);
+        }
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0) {
-            int navY = panelY + 108;
-            for (Page item : Page.values()) {
-                int y = navY + item.ordinal() * 43;
-                if (mouseX >= panelX + 10 && mouseX <= panelX + sideW - 10
-                        && mouseY >= y - 6 && mouseY <= y + 29) {
-                    select(item);
-                    return true;
-                }
+    public boolean mouseClicked(double mx,double my,int button) {
+        if (button==0) {
+            int navY=py+100;
+            for(Page p:Page.values()) {
+                int y=navY+p.ordinal()*42;
+                if(mx>=px+8&&mx<=px+sw-8&&my>=y-5&&my<=y+28){select(p);return true;}
             }
-            if (mouseX >= panelX + panelW - 48 && mouseX <= panelX + panelW - 16
-                    && mouseY >= panelY + 16 && mouseY <= panelY + 48) {
-                close();
-                return true;
-            }
-            if (page == Page.STREAMER) {
-                int x = panelX + sideW + 28;
-                int y = panelY + 88;
-                int w = Math.min(420, panelW - sideW - 56);
-                if (mouseX >= x + w - 94 && mouseX <= x + w - 12
-                        && mouseY >= y + 52 && mouseY <= y + 86) {
-                    StreamerConfig.enabled = !StreamerConfig.enabled;
-                    StreamerConfig.save();
-                    return true;
+            if(mx>=px+pw-48&&mx<=px+pw-12&&my>=py+12&&my<=py+48){close();return true;}
+            int x=px+sw+26,y=py+82,gap=14,available=pw-sw-52,cw=(available-gap)/2;
+            switch(page) {
+                case HUD -> {
+                    toggleAt(mx,my,x,y+48,cw,"watermark"); toggleAt(mx,my,x+cw+gap,y+48,cw,"fps");
+                    toggleAt(mx,my,x,y+142,cw,"coords"); toggleAt(mx,my,x+cw+gap,y+142,cw,"ping");
+                    toggleAt(mx,my,x,y+236,cw,"target_hud"); toggleAt(mx,my,x+cw+gap,y+236,cw,"block_info");
                 }
-                if (mouseX >= x && mouseX <= x + 150
-                        && mouseY >= y + 218 && mouseY <= y + 250
-                        && original != null && alias != null) {
-                    String from = original.getText().trim();
-                    String to = alias.getText().trim();
-                    if (!from.isEmpty() && !to.isEmpty()) {
-                        StreamerConfig.aliases.put(from, to);
-                        StreamerConfig.save();
-                        original.setText("");
-                        alias.setText("");
+                case VISUALS -> {
+                    toggleAt(mx,my,x,y+48,cw,"block_overlay"); toggleAt(mx,my,x+cw+gap,y+48,cw,"crosshair");
+                    toggleAt(mx,my,x,y+142,cw,"fullbright"); toggleAt(mx,my,x+cw+gap,y+142,cw,"weather_fx");
+                }
+                case EFFECTS -> {
+                    toggleAt(mx,my,x,y+48,cw,"kill_effect"); toggleAt(mx,my,x+cw+gap,y+48,cw,"hit_particles");
+                    toggleAt(mx,my,x,y+142,cw,"totem_fx"); toggleAt(mx,my,x+cw+gap,y+142,cw,"animations");
+                }
+                case MARKS -> { toggleAt(mx,my,x,y+48,cw,"waypoints"); toggleAt(mx,my,x+cw+gap,y+48,cw,"death_marker"); }
+                case UTILITIES -> {
+                    toggleAt(mx,my,x,y+48,cw,"zoom"); toggleAt(mx,my,x+cw+gap,y+48,cw,"keystrokes");
+                    toggleAt(mx,my,x,y+142,cw,"cps");
+                }
+                case STREAMER -> {
+                    toggleAt(mx,my,x,y+48,Math.min(430,available),"streamer");
+                    if(mx>=x&&mx<=x+150&&my>=y+228&&my<=y+258&&original!=null&&alias!=null) {
+                        String from=original.getText().trim(),to=alias.getText().trim();
+                        if(!from.isEmpty()&&!to.isEmpty()){StreamerConfig.aliases.put(from,to);StreamerConfig.save();original.setText("");alias.setText("");}
                     }
-                    return true;
                 }
+                case CONFIGS -> { toggleAt(mx,my,x,y+48,cw,"default_profile"); toggleAt(mx,my,x+cw+gap,y+48,cw,"auto_save"); }
             }
+            return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(mx,my,button);
     }
 
-    @Override
-    public boolean shouldPause() {
-        return false;
-    }
+    @Override public boolean shouldPause(){return false;}
 }
