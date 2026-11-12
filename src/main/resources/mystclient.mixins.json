@@ -1,0 +1,7 @@
+{
+  "required": true,
+  "package": "dev.myst.client.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": ["PlayerListEntryMixin"],
+  "injectors": { "defaultRequire": 1 }
+}
