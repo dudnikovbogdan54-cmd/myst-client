@@ -135,7 +135,8 @@ public final class MystScreen extends Screen {
     }
 
     private void clampScroll() {
-        int rows = (cards().size() + 1) / 2;
+        int columns = (pw - sw - 68) < 340 ? 1 : 2;
+        int rows = (cards().size() + columns - 1) / columns;
         contentHeight = 40 + rows * ((MystUiConfig.compact ? 64 : 78) + 12);
         int viewport = Math.max(100, ph - 120);
         scrollOffset = Math.max(0, Math.min(scrollOffset, Math.max(0, contentHeight - viewport)));
@@ -181,15 +182,16 @@ public final class MystScreen extends Screen {
         int contentRight = px + pw - 20;
         c.enableScissor(contentLeft, contentTop, contentRight, contentBottom);
         List<ModuleCard> list = cards();
+        int columns = (contentRight - contentLeft) < 340 ? 1 : 2;
         int gap = 10;
         int cardHeight = MystUiConfig.compact ? 64 : 78;
         int rowStep = cardHeight + 12;
-        int cw = Math.max(140, (contentRight - contentLeft - gap) / 2);
+        int cw = Math.max(120, (contentRight - contentLeft - gap * (columns - 1)) / columns);
         int row = 0;
         for (int i = 0; i < list.size(); i++) {
             ModuleCard card = list.get(i);
-            int col = i % 2;
-            row = i / 2;
+            int col = i % columns;
+            row = i / columns;
             int x = contentLeft + col * (cw + gap);
             int y = contentTop + 4 + row * rowStep - scrollOffset;
             boolean hovered = mx >= x && mx <= x + cw && my >= y && my <= y + cardHeight;
@@ -300,7 +302,7 @@ public final class MystScreen extends Screen {
                 } else if (mx <= contentLeft + 195) {
                     pw = Math.min(Math.min(MAX_W, width - 16), pw + 40); ph = Math.min(Math.min(MAX_H, height - 16), ph + 25);
                 } else {
-                    pw = Math.min(760, width - 16); ph = Math.min(460, height - 16);
+                    pw = Math.min(700, width - 16); ph = Math.min(430, height - 16);
                     MystUiConfig.theme = 0; MystUiConfig.compact = true;
                 }
                 MystUiConfig.width = pw; MystUiConfig.height = ph; MystUiConfig.save();
@@ -321,12 +323,13 @@ public final class MystScreen extends Screen {
             int contentLeft = px + sw + 24, contentRight = px + pw - 20;
             if (mx >= contentLeft && mx <= contentRight && my >= contentTop && my <= contentBottom) {
                 List<ModuleCard> list = cards();
-                int gap = 10, cw = Math.max(140, (contentRight - contentLeft - gap) / 2);
+                int columns = (contentRight - contentLeft) < 340 ? 1 : 2;
+                int gap = 10, cw = Math.max(120, (contentRight - contentLeft - gap * (columns - 1)) / columns);
                 int cardHeight = MystUiConfig.compact ? 64 : 78;
                 int rowStep = cardHeight + 12;
                 for (int i = 0; i < list.size(); i++) {
                     ModuleCard card = list.get(i);
-                    int col = i % 2, row = i / 2;
+                    int col = i % columns, row = i / columns;
                     int x = contentLeft + col * (cw + gap);
                     int y = contentTop + 4 + row * rowStep - scrollOffset;
                     if (mx >= x && mx <= x + cw && my >= y && my <= y + cardHeight && card.implemented) {
@@ -355,7 +358,8 @@ public final class MystScreen extends Screen {
         }
         if (click.button() == 1 && page == Page.MARKS) {
             int contentLeft = px + sw + 24, contentTop = py + 74;
-            int cw = Math.max(140, (pw - sw - 68) / 2);
+            int columns = (pw - sw - 68) < 340 ? 1 : 2;
+            int cw = Math.max(120, (pw - sw - 68 - 10 * (columns - 1)) / columns);
             if (mx >= contentLeft && mx <= contentLeft + cw
                     && my >= contentTop + 4 - scrollOffset && my <= contentTop + (MystUiConfig.compact ? 68 : 82) - scrollOffset) {
                 client.setScreen(new WaypointScreen(this));
