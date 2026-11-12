@@ -144,7 +144,8 @@ public final class MystScreen extends Screen {
 
     private void feature(DrawContext c,int x,int y,int w,String title,String desc,String id) {
         boolean implemented = id.equals("streamer") || id.equals("watermark") || id.equals("fps")
-                || id.equals("coords") || id.equals("ping") || id.equals("target_hud") || id.equals("block_info");
+                || id.equals("coords") || id.equals("ping") || id.equals("target_hud") || id.equals("block_info")
+                || id.equals("crosshair") || id.equals("keystrokes") || id.equals("kill_effect");
         boolean on = id.equals("streamer") ? StreamerConfig.enabled : MistConfig.enabled(id);
         c.fill(x,y,x+w,y+78,CARD);
         c.fill(x,y,x+3,y+78,0xFF594078);
@@ -162,7 +163,8 @@ public final class MystScreen extends Screen {
 
     private void toggleAt(double mx,double my,int x,int y,int w,String id) {
         boolean implemented = id.equals("streamer") || id.equals("watermark") || id.equals("fps")
-                || id.equals("coords") || id.equals("ping") || id.equals("target_hud") || id.equals("block_info");
+                || id.equals("coords") || id.equals("ping") || id.equals("target_hud") || id.equals("block_info")
+                || id.equals("crosshair") || id.equals("keystrokes") || id.equals("kill_effect");
         if (!implemented) return;
         if (mx>=x && mx<=x+w && my>=y && my<=y+78) {
             if (id.equals("streamer")) { StreamerConfig.enabled=!StreamerConfig.enabled; StreamerConfig.save(); }
