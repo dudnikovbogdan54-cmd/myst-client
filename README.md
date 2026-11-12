@@ -12,6 +12,8 @@ Original client-side Fabric visual mod by **Aloxmyst_YT** for Minecraft Java **1
 - **Streamer Mode:** local player-name aliases in the TAB list. Aliases are only visible on this client.
 - Module switches and waypoint data are saved under the Minecraft `config` directory.
 - A compact resizable menu with saved accent themes and compact/standard card density.
+- Orange is now the default accent (`#FF7B1D`); Purple, Neon Blue, Mint and Red are available presets.
+- Internal source classes and the local waypoint config use the consistent `Myst` spelling; existing `mist-visuals.json` settings are migrated on first load.
 - HUD panels now have saved background and opacity controls, and their accent follows the selected Myst theme.
 - A custom purple menu texture is bundled in the JAR and optimized for a smaller download.
 
@@ -50,6 +52,11 @@ No through-wall player ESP, x-ray, or server-side modifications are included.
 - Kill Effect is now a world-space particle burst at the tracked target location instead of a flat screen overlay.
 - Menu navigation hitboxes now match the visible sidebar spacing; cards and active navigation have clearer accent/status styling.
 
+
+## Myst Visuals 0.5.7
+- Set the requested orange `#FF7B1D` as the default theme and added named Purple, Neon Blue, Mint and Red presets.
+- Compact/standard card density now changes the actual module card height.
+- Renamed legacy `MistHud` / `MistConfig` internals to `MystHud` / `MystConfig`; legacy waypoint settings are migrated without discarding the old file.
 
 ## Myst Visuals 0.5.6
 - Rebuilt the ClickGUI with responsive one/two-column layouts, rounded panels and controls, aligned switches, text truncation and consistent spacing.

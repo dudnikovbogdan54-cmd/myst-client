@@ -57,8 +57,8 @@ public final class WaypointScreen extends Screen {
         c.drawTextWithShadow(textRenderer, "ТВОИ МЕТКИ  •  ЛКМ — ВКЛ/ВЫКЛ, ПКМ — ИЗМЕНИТЬ",
                 left + 22, top + 252, MUTED);
         int rowY = top + 274;
-        for (int i = 0; i < MistConfig.waypoints.size() && i < 6; i++) {
-            MistConfig.Waypoint p = MistConfig.waypoints.get(i);
+        for (int i = 0; i < MystConfig.waypoints.size() && i < 6; i++) {
+            MystConfig.Waypoint p = MystConfig.waypoints.get(i);
             int y = rowY + i * 25;
             c.fill(left + 20, y, left + widthPanel - 20, y + 21, i == selected ? 0xFF392653 : CARD);
             c.drawTextWithShadow(textRenderer, (p.enabled ? "● " : "○ ") + p.name,
@@ -89,8 +89,8 @@ public final class WaypointScreen extends Screen {
     }
 
     private void loadSelected() {
-        if (selected < 0 || selected >= MistConfig.waypoints.size()) return;
-        MistConfig.Waypoint p = MistConfig.waypoints.get(selected);
+        if (selected < 0 || selected >= MystConfig.waypoints.size()) return;
+        MystConfig.Waypoint p = MystConfig.waypoints.get(selected);
         nameField.setText(p.name);
         xField.setText(Double.toString(p.x));
         yField.setText(Double.toString(p.y));
@@ -105,23 +105,23 @@ public final class WaypointScreen extends Screen {
             double x = Double.parseDouble(xField.getText().trim());
             double y = Double.parseDouble(yField.getText().trim());
             double z = Double.parseDouble(zField.getText().trim());
-            if (selected >= 0 && selected < MistConfig.waypoints.size()) {
-                MistConfig.Waypoint p = MistConfig.waypoints.get(selected);
+            if (selected >= 0 && selected < MystConfig.waypoints.size()) {
+                MystConfig.Waypoint p = MystConfig.waypoints.get(selected);
                 p.name = name.isEmpty() ? p.name : name;
                 p.x = x;
                 p.y = y;
                 p.z = z;
                 p.showDistance = showDistance;
                 p.color = selectedColor;
-                p.dimension = MistConfig.currentDimension();
+                p.dimension = MystConfig.currentDimension();
                 p.enabled = true;
             } else {
-                MistConfig.addWaypoint(name, x, y, z);
-                selected = MistConfig.waypoints.size() - 1;
-                MistConfig.waypoints.get(selected).showDistance = showDistance;
-                MistConfig.waypoints.get(selected).color = selectedColor;
+                MystConfig.addWaypoint(name, x, y, z);
+                selected = MystConfig.waypoints.size() - 1;
+                MystConfig.waypoints.get(selected).showDistance = showDistance;
+                MystConfig.waypoints.get(selected).color = selectedColor;
             }
-            MistConfig.save();
+            MystConfig.save();
         } catch (NumberFormatException ignored) {
             // Invalid coordinate input is left in the fields so it can be corrected.
         }
@@ -169,20 +169,20 @@ public final class WaypointScreen extends Screen {
             }
             if (my >= top + 274 && my < top + 424) {
                 int index = (int)((my - (top + 274)) / 25);
-                if (index >= 0 && index < MistConfig.waypoints.size()) {
+                if (index >= 0 && index < MystConfig.waypoints.size()) {
                     selected = index;
-                    MistConfig.Waypoint p = MistConfig.waypoints.get(index);
+                    MystConfig.Waypoint p = MystConfig.waypoints.get(index);
                     p.enabled = !p.enabled;
-                    MistConfig.save();
+                    MystConfig.save();
                     loadSelected();
                     return true;
                 }
             }
             if (my >= top + 430 && my <= top + 454) {
-                if (mx < left + 145 && selected >= 0 && selected < MistConfig.waypoints.size()) {
-                    MistConfig.waypoints.remove(selected);
+                if (mx < left + 145 && selected >= 0 && selected < MystConfig.waypoints.size()) {
+                    MystConfig.waypoints.remove(selected);
                     selected = -1;
-                    MistConfig.save();
+                    MystConfig.save();
                     nameField.setText("");
                     xField.setText("");
                     yField.setText("");
@@ -195,7 +195,7 @@ public final class WaypointScreen extends Screen {
         }
         if (click.button() == 1 && my >= top + 274 && my < top + 424) {
             int index = (int)((my - (top + 274)) / 25);
-            if (index >= 0 && index < MistConfig.waypoints.size()) {
+            if (index >= 0 && index < MystConfig.waypoints.size()) {
                 selected = index;
                 loadSelected();
                 return true;

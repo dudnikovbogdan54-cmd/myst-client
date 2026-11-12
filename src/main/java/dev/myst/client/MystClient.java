@@ -20,8 +20,8 @@ public final class MystClient implements ClientModInitializer {
         StreamerConfig.load();
         MystUiConfig.load();
         MystVisualConfig.load();
-        MistConfig.load();
-        MistHud.register();
+        MystConfig.load();
+        MystHud.register();
         openMenu = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.mystclient.menu", InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT_SHIFT, KeyBinding.Category.MISC));
@@ -32,11 +32,11 @@ public final class MystClient implements ClientModInitializer {
                 "key.mystclient.waypoint", InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_B, KeyBinding.Category.MISC));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            MistHud.tick();
+            MystHud.tick();
             if (waypointKey.wasPressed() && client.player != null) {
-                MistConfig.setWaypoint(client.player.getX(), client.player.getY(), client.player.getZ());
+                MystConfig.setWaypoint(client.player.getX(), client.player.getY(), client.player.getZ());
             }
-            if (MistConfig.enabled("zoom") && zoomKey.isPressed()) {
+            if (MystConfig.enabled("zoom") && zoomKey.isPressed()) {
                 if (!zooming) {
                     previousFov = client.options.getFov().getValue();
                     zooming = true;

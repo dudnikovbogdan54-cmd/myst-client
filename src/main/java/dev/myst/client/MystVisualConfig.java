@@ -10,7 +10,7 @@ public final class MystVisualConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path FILE = FabricLoader.getInstance().getConfigDir().resolve("myst-visuals-style.json");
     public static int crosshairStyle = 0;
-    public static int crosshairColor = 0xFFF1E9FF;
+    public static int crosshairColor = 0xFFFF7B1D;
     public static int crosshairSize = 7;
     public static int crosshairGap = 3;
     public static int crosshairThickness = 2;

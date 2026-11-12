@@ -122,7 +122,7 @@ public final class MystScreen extends Screen {
     private boolean isEnabled(String id) {
         if (id.equals("streamer")) return StreamerConfig.enabled;
         if (id.equals("cps")) return MystVisualConfig.cpsEnabled;
-        return MistConfig.enabled(id);
+        return MystConfig.enabled(id);
     }
 
     private void toggle(String id) {
@@ -132,7 +132,7 @@ public final class MystScreen extends Screen {
         } else if (id.equals("streamer")) {
             StreamerConfig.enabled = !StreamerConfig.enabled;
             StreamerConfig.save();
-        } else MistConfig.toggle(id);
+        } else MystConfig.toggle(id);
     }
 
     private int contentLeft() { return px + sw + 22; }
@@ -141,7 +141,7 @@ public final class MystScreen extends Screen {
     private int contentBottom() { return py + ph - 34; }
     private int contentWidth() { return Math.max(120, contentRight() - contentLeft()); }
     private int columns() { return contentWidth() >= 500 ? 2 : 1; }
-    private int cardHeight() { return 76; }
+    private int cardHeight() { return MystUiConfig.compact ? 76 : 88; }
     private int cardGap() { return 10; }
     private int cardStep() { return cardHeight() + cardGap(); }
 
@@ -312,7 +312,7 @@ public final class MystScreen extends Screen {
         int x = contentLeft(), y = contentTop() + 8 - scrollOffset;
         int half = (contentWidth() - 10) / 2;
         c.drawTextWithShadow(textRenderer, "ОФОРМЛЕНИЕ МЕНЮ", x, y, WHITE);
-        action(c, new Rect(x, y + 18, half, 28), "ТЕМА: " + (MystUiConfig.theme + 1), mx, my, true);
+        action(c, new Rect(x, y + 18, half, 28), "ТЕМА: " + MystUiConfig.themeName(), mx, my, true);
         action(c, new Rect(x + half + 10, y + 18, half, 28), MystUiConfig.compact ? "КОМПАКТНО: ON" : "КОМПАКТНО: OFF", mx, my, MystUiConfig.compact);
         c.drawTextWithShadow(textRenderer, "РАЗМЕР ОКНА", x, y + 66, WHITE);
         action(c, new Rect(x, y + 84, half, 28), "МЕНЬШЕ", mx, my, false);

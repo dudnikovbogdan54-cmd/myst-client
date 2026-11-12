@@ -15,7 +15,9 @@ public final class MystUiConfig {
     public static boolean compact = true;
     public static boolean hudBackground = true;
     public static int hudOpacity = 85;
-    public static final int[] ACCENTS = {0xFFB58AFF, 0xFF62D6E8, 0xFFFF8AB3, 0xFF8BE0A1};
+    public static final int[] ACCENTS = {0xFFFF7B1D, 0xFFB58AFF, 0xFF4CC9FF, 0xFF65E39A, 0xFFFF5964};
+    public static final String[] THEME_NAMES = {"Orange", "Purple", "Neon Blue", "Mint", "Red"};
+    public static String themeName() { return THEME_NAMES[Math.floorMod(theme, THEME_NAMES.length)]; }
 
     private static final class Data {
         int width = 700, height = 430, theme = 0;

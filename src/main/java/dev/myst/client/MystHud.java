@@ -9,7 +9,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import java.util.Random;
 
-public final class MistHud {
+public final class MystHud {
     private static final int PURPLE = 0xFFB58AFF;
     private static final int PANEL = 0xD91A1425;
     private static final Random RANDOM = new Random();
@@ -20,7 +20,7 @@ public final class MistHud {
     private static long cpsWindowStart = System.currentTimeMillis();
     private static float displayedTargetHealth = -1.0F;
     private static int worldFxTicks;
-    private MistHud() {}
+    private MystHud() {}
 
     public static void register() {
         HudRenderCallback.EVENT.register((ctx, tickCounter) -> render(ctx));
@@ -30,23 +30,23 @@ public final class MistHud {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null || mc.world == null || mc.options.hudHidden) return;
         int y = 8;
-        if (MistConfig.enabled("watermark")) {
+        if (MystConfig.enabled("watermark")) {
             panel(ctx, 8, y, 116, 20);
             ctx.drawTextWithShadow(mc.textRenderer, "MV  Myst Visuals", 14, y + 6, PURPLE);
             y += 25;
         }
-        if (MistConfig.enabled("fps")) {
+        if (MystConfig.enabled("fps")) {
             panel(ctx, 8, y, 100, 18);
             ctx.drawTextWithShadow(mc.textRenderer, "FPS  " + mc.getCurrentFps(), 14, y + 5, 0xFFF1E9FF);
             y += 22;
         }
-        if (MistConfig.enabled("coords")) {
+        if (MystConfig.enabled("coords")) {
             panel(ctx, 8, y, 150, 30);
             ctx.drawTextWithShadow(mc.textRenderer, "X " + (int)mc.player.getX(), 14, y + 4, 0xFFF1E9FF);
             ctx.drawTextWithShadow(mc.textRenderer, "Y " + (int)mc.player.getY() + "   Z " + (int)mc.player.getZ(), 14, y + 16, 0xFFF1E9FF);
             y += 34;
         }
-        if (MistConfig.enabled("ping")) {
+        if (MystConfig.enabled("ping")) {
             var entry = mc.getNetworkHandler() == null ? null : mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
             if (entry != null) {
                 panel(ctx, 8, y, 100, 18);
@@ -63,7 +63,7 @@ public final class MistHud {
             ctx.drawTextWithShadow(mc.textRenderer, cpsText, 14, y + 6, 0xFFF1E9FF);
             y += 24;
         }
-        if (MistConfig.enabled("direction")) {
+        if (MystConfig.enabled("direction")) {
             int quadrant = Math.floorMod((int)Math.floor(mc.player.getYaw() / 90.0F + 0.5F), 4);
             String[] directions = {"S", "W", "N", "E"};
             String directionText = "Facing  " + directions[quadrant];
@@ -71,7 +71,7 @@ public final class MistHud {
             ctx.drawTextWithShadow(mc.textRenderer, directionText, 14, y + 6, 0xFFF1E9FF);
             y += 24;
         }
-        if (MistConfig.enabled("speed")) {
+        if (MystConfig.enabled("speed")) {
             double velocity = Math.sqrt(mc.player.getVelocity().x * mc.player.getVelocity().x
                     + mc.player.getVelocity().z * mc.player.getVelocity().z) * 20.0;
             String speedText = String.format(java.util.Locale.ROOT, "Speed  %.2f b/s", velocity);
@@ -79,7 +79,7 @@ public final class MistHud {
             ctx.drawTextWithShadow(mc.textRenderer, speedText, 14, y + 6, 0xFFF1E9FF);
             y += 24;
         }
-        if (MistConfig.enabled("target_hud") && mc.targetedEntity instanceof LivingEntity target && target.isAlive()) {
+        if (MystConfig.enabled("target_hud") && mc.targetedEntity instanceof LivingEntity target && target.isAlive()) {
             int x = ctx.getScaledWindowWidth() / 2 + 12;
             int ty = ctx.getScaledWindowHeight() / 2 + 8;
             panel(ctx, x, ty, 138, 38);
@@ -94,16 +94,16 @@ public final class MistHud {
             ctx.fill(x + 7, ty + 23, x + 7 + (int)(124 * displayedTargetHealth), ty + 29, MystUiConfig.accent());
             ctx.drawTextWithShadow(mc.textRenderer, String.format(java.util.Locale.ROOT, "%.1f / %.1f HP", target.getHealth(), max), x + 7, ty + 31, 0xFFD9CDEB);
         }
-        if (MistConfig.enabled("block_info") && mc.crosshairTarget instanceof BlockHitResult hit && hit.getType() == HitResult.Type.BLOCK) {
+        if (MystConfig.enabled("block_info") && mc.crosshairTarget instanceof BlockHitResult hit && hit.getType() == HitResult.Type.BLOCK) {
             String name = mc.world.getBlockState(hit.getBlockPos()).getBlock().getName().getString();
             int x = ctx.getScaledWindowWidth() / 2 + 12;
             int by = ctx.getScaledWindowHeight() / 2 + 54;
             panel(ctx, x, by, Math.min(190, mc.textRenderer.getWidth(name) + 18), 20);
             ctx.drawTextWithShadow(mc.textRenderer, name, x + 8, by + 6, 0xFFF1E9FF);
         }
-        if (MistConfig.enabled("waypoints")) {
+        if (MystConfig.enabled("waypoints")) {
             int markY = 8;
-            for (MistConfig.Waypoint point : MistConfig.waypoints) {
+            for (MystConfig.Waypoint point : MystConfig.waypoints) {
                 if (!point.enabled) continue;
                 double dx = point.x - mc.player.getX();
                 double dy = point.y - mc.player.getY();
@@ -118,8 +118,8 @@ public final class MistHud {
                 markY += 24;
             }
         }
-        if (MistConfig.enabled("crosshair")) drawCrosshair(ctx);
-        if (MistConfig.enabled("keystrokes")) drawKeystrokes(ctx, mc);
+        if (MystConfig.enabled("crosshair")) drawCrosshair(ctx);
+        if (MystConfig.enabled("keystrokes")) drawKeystrokes(ctx, mc);
     }
 
     private static void drawCrosshair(DrawContext ctx) {
@@ -167,11 +167,11 @@ public final class MistHud {
     }
 
     private static void spawnWaypointWorldFx(MinecraftClient mc) {
-        if (mc.player == null || mc.world == null || !MistConfig.enabled("waypoints")) return;
+        if (mc.player == null || mc.world == null || !MystConfig.enabled("waypoints")) return;
         if (++worldFxTicks % 5 != 0) return;
         String dimension = mc.world.getRegistryKey().getValue().toString();
         double px = mc.player.getX(), py = mc.player.getY(), pz = mc.player.getZ();
-        for (MistConfig.Waypoint point : MistConfig.waypoints) {
+        for (MystConfig.Waypoint point : MystConfig.waypoints) {
             if (!point.enabled) continue;
             if (point.dimension != null && !point.dimension.isBlank() && !point.dimension.equals(dimension)) continue;
             double x = point.x + 0.5, y = point.y + 0.15, z = point.z + 0.5;
@@ -238,7 +238,7 @@ public final class MistHud {
             return;
         }
         float health = target.getHealth();
-        if (previousHealth > 0.0F && health <= 0.0F && MistConfig.enabled("kill_effect")) {
+        if (previousHealth > 0.0F && health <= 0.0F && MystConfig.enabled("kill_effect")) {
             spawnKillWorldFx(mc, target);
         }
         previousHealth = health;

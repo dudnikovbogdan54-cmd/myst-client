@@ -11,9 +11,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class MistConfig {
+public final class MystConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Path FILE = FabricLoader.getInstance().getConfigDir().resolve("mist-visuals.json");
+    private static final Path FILE = FabricLoader.getInstance().getConfigDir().resolve("myst-visuals.json");
+    private static final Path LEGACY_FILE = FabricLoader.getInstance().getConfigDir().resolve("mist-visuals.json");
     public static final Map<String, Boolean> modules = new LinkedHashMap<>();
     public static final List<Waypoint> waypoints = new ArrayList<>();
     public static boolean waypointSet = false;
@@ -51,8 +52,9 @@ public final class MistConfig {
     }
     public static void load() {
         try {
-            if (!Files.exists(FILE)) { save(); return; }
-            Data data = GSON.fromJson(Files.readString(FILE), Data.class);
+            Path source = Files.exists(FILE) ? FILE : LEGACY_FILE;
+            if (!Files.exists(source)) { save(); return; }
+            Data data = GSON.fromJson(Files.readString(source), Data.class);
             if (data != null) {
                 if (data.modules != null) modules.putAll(data.modules);
                 if (data.waypoints != null) {
@@ -68,6 +70,7 @@ public final class MistConfig {
                     waypoints.add(new Waypoint("Старая метка", waypointX, waypointY, waypointZ));
                 }
             }
+            if (!source.equals(FILE)) save();
         } catch (Exception ignored) { }
     }
     public static void addWaypoint(String name, double x, double y, double z) {
