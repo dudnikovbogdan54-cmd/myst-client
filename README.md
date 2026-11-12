@@ -11,6 +11,8 @@ Original client-side Fabric visual mod by **Aloxmyst_YT** for Minecraft Java **1
 - **Utilities:** hold **C** for temporary zoom when Zoom is enabled; Keystrokes displays W/A/S/D and mouse buttons.
 - **Streamer Mode:** local player-name aliases in the TAB list. Aliases are only visible on this client.
 - Module switches and waypoint data are saved under the Minecraft `config` directory.
+- A compact resizable menu with saved accent themes and compact/standard card density.
+- HUD panels now have saved background and opacity controls, and their accent follows the selected Myst theme.
 - A custom purple menu texture is bundled in the JAR and optimized for a smaller download.
 
 ## Controls
