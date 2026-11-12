@@ -1,4 +1,4 @@
-# Mist Visuals
+# Myst Visuals
 
 Original client-side Fabric visual mod by **Aloxmyst_YT** for Minecraft Java **1.21.11**.
 
@@ -11,7 +11,7 @@ Original client-side Fabric visual mod by **Aloxmyst_YT** for Minecraft Java **1
 - **Utilities:** hold **C** for temporary zoom when Zoom is enabled; Keystrokes displays W/A/S/D and mouse buttons.
 - **Streamer Mode:** local player-name aliases in the TAB list. Aliases are only visible on this client.
 - Module switches and waypoint data are saved under the Minecraft `config` directory.
-- Original high-resolution purple menu texture is bundled in the JAR.
+- A custom purple menu texture is bundled in the JAR and optimized for a smaller download.
 
 ## Controls
 
@@ -28,7 +28,7 @@ Original client-side Fabric visual mod by **Aloxmyst_YT** for Minecraft Java **1
 - Fabric API for 1.21.11
 - Java 21+ at runtime
 
-The project is built by GitHub Actions using JDK 25 and targets Java 21 bytecode. CI checks archive contents and requires a JAR size of at least 5 MiB. Successful CI compilation does not prove runtime compatibility on every launcher or Android device; MojoLauncher still needs an in-game test.
+The project is built by GitHub Actions using JDK 25 and targets Java 21 bytecode. CI verifies the JAR archive and required classes/resources. A direct JAR download is published as a GitHub Release. Successful CI compilation does not prove runtime compatibility on every launcher or Android device; MojoLauncher still needs an in-game test.
 
 ## Not implemented yet
 
