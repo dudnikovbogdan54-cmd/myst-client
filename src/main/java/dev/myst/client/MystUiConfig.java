@@ -13,11 +13,15 @@ public final class MystUiConfig {
     public static int height = 430;
     public static int theme = 0;
     public static boolean compact = true;
+    public static boolean hudBackground = true;
+    public static int hudOpacity = 85;
     public static final int[] ACCENTS = {0xFFB58AFF, 0xFF62D6E8, 0xFFFF8AB3, 0xFF8BE0A1};
 
     private static final class Data {
         int width = 700, height = 430, theme = 0;
         boolean compact = true;
+        boolean hudBackground = true;
+        int hudOpacity = 85;
     }
 
     public static void load() {
@@ -29,6 +33,8 @@ public final class MystUiConfig {
                 height = Math.max(330, Math.min(700, d.height));
                 theme = Math.floorMod(d.theme, ACCENTS.length);
                 compact = d.compact;
+                hudBackground = d.hudBackground;
+                hudOpacity = Math.max(35, Math.min(100, d.hudOpacity));
             }
         } catch (Exception ignored) { }
     }
@@ -39,6 +45,7 @@ public final class MystUiConfig {
         try {
             Data d = new Data();
             d.width = width; d.height = height; d.theme = theme; d.compact = compact;
+            d.hudBackground = hudBackground; d.hudOpacity = hudOpacity;
             Files.createDirectories(FILE.getParent());
             Files.writeString(FILE, GSON.toJson(d));
         } catch (Exception ignored) { }
