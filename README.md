@@ -7,7 +7,7 @@ An original client-side Fabric mod by **Aloxmyst_YT** for Minecraft Java **1.21.
 - Right Shift opens the purple Mist Visuals menu.
 - HUD: watermark, FPS, coordinates, ping, Target HUD and block information.
 - Visuals: custom crosshair.
-- Utilities: keystrokes display (W/A/S/D and mouse buttons).
+- Utilities: keystrokes display (W/A/S/D and mouse buttons), plus hold **C** for temporary camera zoom when Zoom is enabled.
 - Effects: a short decorative purple frame effect when the currently targeted living entity is defeated.
 - Streamer Mode: local TAB-list nickname aliases; changes are visible only on this client.
 - Settings are saved locally in the Minecraft `config` directory.
