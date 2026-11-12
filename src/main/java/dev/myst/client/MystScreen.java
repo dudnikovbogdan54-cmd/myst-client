@@ -54,7 +54,7 @@ public final class MystScreen extends Screen {
         alias = null;
         if (page == Page.STREAMER) {
             int x = px + sw + 26;
-            int y = py + 206 - scrollOffset;
+            int y = py + 264 - scrollOffset;
             int w = Math.min(340, pw - sw - 52);
             original = new TextFieldWidget(textRenderer, x, y, w, 20, Text.literal("Original nickname"));
             original.setPlaceholder(Text.literal("Настоящий ник"));
@@ -205,8 +205,8 @@ public final class MystScreen extends Screen {
             }
         }
         if (page == Page.STREAMER) {
-            c.drawTextWithShadow(textRenderer, "НАСТОЯЩИЙ НИК", contentLeft, contentTop + 170 - scrollOffset, MUTED);
-            c.drawTextWithShadow(textRenderer, "КАК ПОКАЗЫВАТЬ", contentLeft, contentTop + 225 - scrollOffset, MUTED);
+            c.drawTextWithShadow(textRenderer, "НАСТОЯЩИЙ НИК", contentLeft, contentTop + 150 - scrollOffset, MUTED);
+            c.drawTextWithShadow(textRenderer, "КАК ПОКАЗЫВАТЬ", contentLeft, contentTop + 205 - scrollOffset, MUTED);
             drawSmallButton(c, contentLeft, contentTop + 258 - scrollOffset, 142, "СОХРАНИТЬ НИК");
             c.drawTextWithShadow(textRenderer, "Замена действует только локально.", contentLeft + 154, contentTop + 266 - scrollOffset, MUTED);
         }
