@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "mystclient",
   "version": "${version}",
-  "name": "MYST Client",
-  "description": "A custom client-side mod created by Owner Aloxmyst_YT. Includes local Streamer Mode name aliases and personal interface settings.",
+  "name": "Mist Visuals",
+  "description": "Purple-themed client interface with local Streamer Mode and a modular visual settings menu.",
   "authors": ["Aloxmyst_YT"],
   "icon": "assets/mystclient/icon.png",
   "contact": {
