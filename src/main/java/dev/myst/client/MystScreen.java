@@ -4,6 +4,8 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.util.Identifier;
 import net.minecraft.text.Text;
 
 public final class MystScreen extends Screen {
@@ -17,7 +19,7 @@ public final class MystScreen extends Screen {
     private Page page = Page.HUD;
     private TextFieldWidget original, alias;
     private int px, py, pw, ph, sw;
-    private static final int PANEL = 0xF0141021, CARD = 0xE91D172B;
+    private static final int PANEL = 0xB0141021, CARD = 0xE91D172B;
     private static final int PURPLE = 0xFFB58AFF, DARK = 0xFF7042C8;
     private static final int WHITE = 0xFFF2ECFF, MUTED = 0xFF9D91AD;
 
@@ -48,7 +50,8 @@ public final class MystScreen extends Screen {
     public void render(DrawContext c, int mx, int my, float delta) {
         c.fill(0, 0, width, height, 0xD9080610);
         c.fill(px, py, px + pw, py + ph, PANEL);
-        c.fill(px, py, px + sw, py + ph, 0xFF100C1B);
+        c.drawTexture(RenderPipelines.GUI_TEXTURED, Identifier.of("mystclient", "textures/gui/mist_background.png"), px, py, 0.0F, 0.0F, pw, ph, 2048, 2048, 0x70FFFFFF);
+        c.fill(px, py, px + sw, py + ph, 0xF0100C1B);
         c.fill(px + sw - 1, py, px + sw, py + ph, 0xFF30243D);
         c.fill(px + sw, py + 62, px + pw, py + 63, 0xFF30243D);
 
