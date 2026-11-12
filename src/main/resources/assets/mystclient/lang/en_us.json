@@ -1,5 +1,5 @@
 {
-  "modmenu.nameTranslation.mystclient": "MYST Client",
-  "modmenu.summaryTranslation.mystclient": "Custom client-side mod by Owner Aloxmyst_YT.",
-  "modmenu.descriptionTranslation.mystclient": "A special client-side mod created by Owner Aloxmyst_YT. Includes Streamer Mode for local TAB name aliases and personal interface settings. Aliases are visible only on this client and do not change real accounts or server-side names."
+  "modmenu.nameTranslation.mystclient": "Mist Visuals",
+  "modmenu.summaryTranslation.mystclient": "Purple client interface and visual settings.",
+  "modmenu.descriptionTranslation.mystclient": "Mist Visuals is a client-side mod with a purple interface and HUD, Visuals, Marks, Utilities, Streamer and Configs sections. Streamer Mode locally replaces displayed TAB names on this client only. Other visual modules will be added as they are implemented."
 }
