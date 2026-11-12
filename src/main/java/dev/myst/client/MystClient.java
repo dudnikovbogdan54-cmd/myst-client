@@ -12,7 +12,6 @@ public final class MystClient implements ClientModInitializer {
     private static KeyBinding openMenu;
     private static KeyBinding zoomKey;
     private static KeyBinding waypointKey;
-    private static Double previousGamma;
     private static Integer previousFov;
     private static boolean zooming;
 
@@ -34,13 +33,6 @@ public final class MystClient implements ClientModInitializer {
             MistHud.tick();
             if (waypointKey.wasPressed() && client.player != null) {
                 MistConfig.setWaypoint(client.player.getX(), client.player.getY(), client.player.getZ());
-            }
-            if (client.player != null && MistConfig.enabled("fullbright")) {
-                if (previousGamma == null) previousGamma = client.options.getGamma().getValue();
-                client.options.getGamma().setValue(16.0);
-            } else if (previousGamma != null) {
-                client.options.getGamma().setValue(previousGamma);
-                previousGamma = null;
             }
             if (MistConfig.enabled("zoom") && zoomKey.isPressed()) {
                 if (!zooming) {
