@@ -74,7 +74,7 @@ public final class MistHud {
         if (MistConfig.enabled("speed")) {
             double velocity = Math.sqrt(mc.player.getVelocity().x * mc.player.getVelocity().x
                     + mc.player.getVelocity().z * mc.player.getVelocity().z) * 20.0;
-            String speedText = String.format(java.util.Locale.ROOT, "Speed  %.2f m/s", velocity);
+            String speedText = String.format(java.util.Locale.ROOT, "Speed  %.2f b/s", velocity);
             panel(ctx, 8, y, mc.textRenderer.getWidth(speedText) + 14, 20);
             ctx.drawTextWithShadow(mc.textRenderer, speedText, 14, y + 6, 0xFFF1E9FF);
             y += 24;
