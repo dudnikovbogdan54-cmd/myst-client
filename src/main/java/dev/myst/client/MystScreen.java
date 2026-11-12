@@ -31,7 +31,7 @@ public final class MystScreen extends Screen {
         sw = Math.max(132, Math.min(184, pw / 5));
         original = null; alias = null;
         if (page == Page.STREAMER) {
-            int x = px + sw + 30, y = py + 258, w = Math.min(360, pw - sw - 60);
+            int x = px + sw + 30, y = py + 242, w = Math.min(360, pw - sw - 60);
             original = new TextFieldWidget(textRenderer, x, y, w, 22, Text.literal("Original nickname"));
             original.setPlaceholder(Text.literal("Настоящий ник"));
             alias = new TextFieldWidget(textRenderer, x, y + 38, w, 22, Text.literal("Display nickname"));
@@ -143,18 +143,27 @@ public final class MystScreen extends Screen {
     }
 
     private void feature(DrawContext c,int x,int y,int w,String title,String desc,String id) {
+        boolean implemented = id.equals("streamer") || id.equals("watermark") || id.equals("fps")
+                || id.equals("coords") || id.equals("ping") || id.equals("target_hud") || id.equals("block_info");
         boolean on = id.equals("streamer") ? StreamerConfig.enabled : MistConfig.enabled(id);
         c.fill(x,y,x+w,y+78,CARD);
         c.fill(x,y,x+3,y+78,0xFF594078);
         c.drawTextWithShadow(textRenderer,title,x+14,y+14,WHITE);
         c.drawTextWithShadow(textRenderer,desc,x+14,y+36,MUTED);
-        int sx=x+w-58;
-        c.fill(sx,y+12,sx+42,y+32,on?0xFF8255C5:0xFF403849);
-        c.fill(on?sx+23:sx+3,y+14,on?sx+39:sx+19,y+30,WHITE);
-        c.drawTextWithShadow(textRenderer,on?"ON":"OFF",sx-28,y+18,on?PURPLE:MUTED);
+        if (implemented) {
+            int sx=x+w-58;
+            c.fill(sx,y+12,sx+42,y+32,on?0xFF8255C5:0xFF403849);
+            c.fill(on?sx+23:sx+3,y+14,on?sx+39:sx+19,y+30,WHITE);
+            c.drawTextWithShadow(textRenderer,on?"ON":"OFF",sx-28,y+18,on?PURPLE:MUTED);
+        } else {
+            c.drawTextWithShadow(textRenderer,"SOON",x+w-48,y+18,MUTED);
+        }
     }
 
     private void toggleAt(double mx,double my,int x,int y,int w,String id) {
+        boolean implemented = id.equals("streamer") || id.equals("watermark") || id.equals("fps")
+                || id.equals("coords") || id.equals("ping") || id.equals("target_hud") || id.equals("block_info");
+        if (!implemented) return;
         if (mx>=x && mx<=x+w && my>=y && my<=y+78) {
             if (id.equals("streamer")) { StreamerConfig.enabled=!StreamerConfig.enabled; StreamerConfig.save(); }
             else MistConfig.toggle(id);
