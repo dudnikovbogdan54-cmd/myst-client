@@ -2,7 +2,7 @@ name: Build Myst Visuals
 permissions:
   contents: write
 concurrency:
-  group: myst-visuals-${{ github.ref }}
+  group: myst-visuals-${{ github.sha }}
   cancel-in-progress: true
 
 on:
