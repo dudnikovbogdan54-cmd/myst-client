@@ -3,9 +3,27 @@
   "id": "mystclient",
   "version": "${version}",
   "name": "MYST Client",
-  "description": "Client-side visual and streamer utilities.",
+  "description": "A custom client-side mod created by Owner Aloxmyst_YT. Includes local Streamer Mode name aliases and personal interface settings.",
+  "authors": ["Aloxmyst_YT"],
+  "icon": "assets/mystclient/icon.png",
+  "contact": {
+    "sources": "https://github.com/dudnikovbogdan54-cmd/myst-client"
+  },
   "environment": "client",
-  "entrypoints": { "client": ["dev.myst.client.MystClient"] },
+  "entrypoints": {
+    "client": ["dev.myst.client.MystClient"]
+  },
   "mixins": ["mystclient.mixins.json"],
-  "depends": { "fabricloader": ">=0.19.0", "minecraft": "~1.21.11", "java": ">=21", "fabric-api": "*" }
+  "depends": {
+    "fabricloader": ">=0.19.0",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "custom": {
+    "modmenu": {
+      "summaryTranslation": "modmenu.summaryTranslation.mystclient",
+      "descriptionTranslation": "modmenu.descriptionTranslation.mystclient"
+    }
+  }
 }

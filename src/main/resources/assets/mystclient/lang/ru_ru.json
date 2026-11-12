@@ -1,0 +1,5 @@
+{
+  "modmenu.nameTranslation.mystclient": "MYST Client",
+  "modmenu.summaryTranslation.mystclient": "Авторский клиентский мод от Owner Aloxmyst_YT.",
+  "modmenu.descriptionTranslation.mystclient": "Специальный клиентский мод, созданный владельцем Owner Aloxmyst_YT. Включает Streamer Mode для локальной замены ников в TAB и персональные настройки интерфейса. Замены видны только на этом клиенте и не меняют реальные аккаунты или серверные ники."
+}

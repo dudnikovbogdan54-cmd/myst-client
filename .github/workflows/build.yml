@@ -11,14 +11,19 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '25'
+          java-version: '21'
       - uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: '9.7.1'
+          gradle-version: '9.2.1'
       - name: Build mod
         run: gradle build
+      - name: Verify JAR contents
+        run: |
+          test -f build/libs/MYST-Client-0.1.0.jar
+          jar tf build/libs/MYST-Client-0.1.0.jar | grep -q 'fabric.mod.json'
+          jar tf build/libs/MYST-Client-0.1.0.jar | grep -q 'assets/mystclient/icon.png'
       - uses: actions/upload-artifact@v4
         with:
           name: MYST-Client-1.21.11
-          path: build/libs/*-*.jar
+          path: build/libs/MYST-Client-0.1.0.jar
           if-no-files-found: error

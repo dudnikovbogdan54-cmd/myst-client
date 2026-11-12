@@ -1,15 +1,28 @@
 # MYST Client
 
-Client-side Fabric mod for Minecraft Java 1.21.11.
+A custom client-side Fabric mod for Minecraft Java 1.21.11, created by **Owner Aloxmyst_YT**.
 
-## Features in this starter build
-- Right Shift opens the MYST menu.
+## Features
+- Right Shift opens the MYST Client menu.
 - Streamer Mode locally replaces player names in the TAB list.
-- Add aliases and toggle Streamer Mode from the menu.
+- Add or update local nickname aliases from the menu.
+- Toggle Streamer Mode on or off.
 - Settings are saved to `config/mystclient-streamer.json`.
+- Mod Menu listing includes a custom icon, owner credit, and localized description.
+
+## Compatibility
+- Minecraft Java 1.21.11
+- Fabric Loader 0.19.5 or newer
+- Fabric API for 1.21.11
+- Java 21 or newer
+
+Streamer aliases are client-side display changes only. They do not change account names or server-side names. Android and MojoLauncher runtime compatibility must still be confirmed by testing on the target device.
 
 ## Build
-Requires Java 21 and Gradle 9.2.1: `gradle build`.
-The GitHub Actions workflow builds the mod and uploads the JAR as an artifact.
+Requires Java 21 and Gradle 9.2.1 or newer:
 
-Fabric Loader and Fabric API are required separately. This is a local display-only name replacement; it does not change account names or server-side names. Android/ MoJoLauncher runtime compatibility still needs device testing.
+```sh
+gradle build
+```
+
+The GitHub Actions workflow builds the mod and uploads the JAR as the `MYST-Client-1.21.11` artifact.
