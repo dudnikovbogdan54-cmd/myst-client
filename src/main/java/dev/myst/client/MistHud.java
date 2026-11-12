@@ -4,19 +4,22 @@ import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
+import java.util.Random;
 
 public final class MistHud {
     private static final int PURPLE = 0xFFB58AFF;
     private static final int PANEL = 0xD91A1425;
+    private static final Random RANDOM = new Random();
     private static java.util.UUID trackedTarget;
     private static float previousHealth = -1.0F;
-    private static long killEffectUntil;
     private static boolean lastAttackPressed, lastUsePressed;
     private static int leftClicks, rightClicks, shownLeftCps, shownRightCps;
     private static long cpsWindowStart = System.currentTimeMillis();
     private static float displayedTargetHealth = -1.0F;
+    private static int worldFxTicks;
     private MistHud() {}
 
     public static void register() {
@@ -48,6 +51,7 @@ public final class MistHud {
             if (entry != null) {
                 panel(ctx, 8, y, 100, 18);
                 ctx.drawTextWithShadow(mc.textRenderer, "Ping  " + entry.getLatency() + " ms", 14, y + 5, 0xFFF1E9FF);
+                y += 22;
             }
         }
         if (MystVisualConfig.cpsEnabled) {
@@ -100,7 +104,6 @@ public final class MistHud {
         }
         if (MistConfig.enabled("crosshair")) drawCrosshair(ctx);
         if (MistConfig.enabled("keystrokes")) drawKeystrokes(ctx, mc);
-        if (MistConfig.enabled("kill_effect") && System.currentTimeMillis() < killEffectUntil) drawKillEffect(ctx);
     }
 
     private static void drawCrosshair(DrawContext ctx) {
@@ -147,18 +150,45 @@ public final class MistHud {
         ctx.drawTextWithShadow(mc.textRenderer, label, x + (40 - tw) / 2, y + 6, 0xFFF5EEFF);
     }
 
-    private static void drawKillEffect(DrawContext ctx) {
-        int cx = ctx.getScaledWindowWidth() / 2;
-        int cy = ctx.getScaledWindowHeight() / 2;
-        long remaining = Math.max(0L, killEffectUntil - System.currentTimeMillis());
-        int alpha = (int)(Math.min(1.0, remaining / 650.0) * 150);
-        int color = (alpha << 24) | 0xB58AFF;
-        for (int i = 0; i < 4; i++) {
-            int radius = 12 + i * 7;
-            ctx.fill(cx - radius, cy - radius, cx + radius, cy - radius + 1, color);
-            ctx.fill(cx - radius, cy + radius - 1, cx + radius, cy + radius, color);
-            ctx.fill(cx - radius, cy - radius, cx - radius + 1, cy + radius, color);
-            ctx.fill(cx + radius - 1, cy - radius, cx + radius, cy + radius, color);
+    private static void spawnWaypointWorldFx(MinecraftClient mc) {
+        if (mc.player == null || mc.world == null || !MistConfig.enabled("waypoints")) return;
+        if (++worldFxTicks % 5 != 0) return;
+        String dimension = mc.world.getRegistryKey().getValue().toString();
+        double px = mc.player.getX(), py = mc.player.getY(), pz = mc.player.getZ();
+        for (MistConfig.Waypoint point : MistConfig.waypoints) {
+            if (!point.enabled) continue;
+            if (point.dimension != null && !point.dimension.isBlank() && !point.dimension.equals(dimension)) continue;
+            double x = point.x + 0.5, y = point.y + 0.15, z = point.z + 0.5;
+            double dx = x - px, dy = y - py, dz = z - pz;
+            if (dx * dx + dy * dy + dz * dz > 96.0 * 96.0) continue;
+            // A small animated 3D beacon: base, upper marker and a rotating purple halo.
+            mc.world.addParticle(ParticleTypes.END_ROD, x, y, z, 0.0, 0.025, 0.0);
+            mc.world.addParticle(ParticleTypes.END_ROD, x, y + 1.6, z, 0.0, 0.018, 0.0);
+            mc.world.addParticle(ParticleTypes.WITCH, x, y + 2.8, z, 0.0, 0.0, 0.0);
+            if (worldFxTicks % 10 == 0) {
+                double angle = worldFxTicks * 0.16;
+                for (int i = 0; i < 3; i++) {
+                    double a = angle + i * (Math.PI * 2.0 / 3.0);
+                    mc.world.addParticle(ParticleTypes.END_ROD,
+                            x + Math.cos(a) * 0.55, y + 0.1, z + Math.sin(a) * 0.55,
+                            0.0, 0.01, 0.0);
+                }
+            }
+        }
+    }
+
+    private static void spawnKillWorldFx(MinecraftClient mc, LivingEntity target) {
+        double x = target.getX(), y = target.getY() + target.getHeight() * 0.55, z = target.getZ();
+        for (int i = 0; i < 28; i++) {
+            double vx = (RANDOM.nextDouble() - 0.5) * 0.22;
+            double vy = RANDOM.nextDouble() * 0.18 + 0.025;
+            double vz = (RANDOM.nextDouble() - 0.5) * 0.22;
+            mc.world.addParticle(ParticleTypes.END_ROD, x, y, z, vx, vy, vz);
+        }
+        for (int i = 0; i < 14; i++) {
+            double angle = i * (Math.PI * 2.0 / 14.0);
+            mc.world.addParticle(ParticleTypes.WITCH, x + Math.cos(angle) * 0.55, y + 0.2,
+                    z + Math.sin(angle) * 0.55, 0.0, 0.035, 0.0);
         }
     }
 
@@ -174,7 +204,10 @@ public final class MistHud {
                 shownLeftCps = leftClicks; shownRightCps = rightClicks;
                 leftClicks = rightClicks = 0; cpsWindowStart = now;
             }
-        } else lastAttackPressed = lastUsePressed = false;
+            spawnWaypointWorldFx(mc);
+        } else {
+            lastAttackPressed = lastUsePressed = false;
+        }
         if (mc.player == null || mc.targetedEntity == null) {
             trackedTarget = null;
             previousHealth = -1.0F;
@@ -190,7 +223,7 @@ public final class MistHud {
         }
         float health = target.getHealth();
         if (previousHealth > 0.0F && health <= 0.0F && MistConfig.enabled("kill_effect")) {
-            killEffectUntil = System.currentTimeMillis() + 650L;
+            spawnKillWorldFx(mc, target);
         }
         previousHealth = health;
     }
