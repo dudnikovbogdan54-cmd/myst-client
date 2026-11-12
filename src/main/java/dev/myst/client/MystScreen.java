@@ -43,7 +43,7 @@ public final class MystScreen extends Screen {
         alias = null;
         if (page == Page.STREAMER) {
             int x = panelX + sideW + 34;
-            int y = panelY + 233;
+            int y = panelY + 248;
             int w = Math.min(360, panelW - sideW - 70);
             original = new TextFieldWidget(textRenderer, x, y, w, 22, Text.literal("Original nickname"));
             original.setPlaceholder(Text.literal("Настоящий ник"));
