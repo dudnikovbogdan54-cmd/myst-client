@@ -109,7 +109,7 @@ public final class MystScreen extends Screen {
             case UTILITIES -> {
                 list.add(new ModuleCard("zoom","Zoom","Приближение при удержании C",true));
                 list.add(new ModuleCard("keystrokes","Keystrokes","Визуализация клавиш",true));
-                list.add(new ModuleCard("cps","CPS Counter","Счётчик кликов",false));
+                list.add(new ModuleCard("cps","CPS Counter","Счётчик кликов",true));
             }
             case STREAMER -> {
                 list.add(new ModuleCard("streamer","Streamer Mode","Локальная замена ников в TAB",true));
@@ -164,7 +164,7 @@ public final class MystScreen extends Screen {
 
         int navY = py + 88;
         for (Page p : Page.values()) {
-            int y = navY + p.ordinal() * 33;
+            int y = navY + p.ordinal() * 27;
             boolean active = p == page;
             if (active) {
                 c.fill(px + 9, y - 4, px + sw - 9, y + 25, 0xFF332445);
@@ -223,7 +223,7 @@ public final class MystScreen extends Screen {
         if (page == Page.VISUAL_LAB) {
             int sy = contentTop + 10;
             c.drawTextWithShadow(textRenderer, "CUSTOM CROSSHAIR", contentLeft, sy, WHITE);
-            drawSmallButton(c, contentLeft, sy + 18, 180, "СТИЛЬ: " + new String[]{"CLASSIC","DOT","PLUS","CIRCLE"}[MystVisualConfig.crosshairStyle]);
+            drawSmallButton(c, contentLeft, sy + 18, 180, "СТИЛЬ: " + new String[]{"CLASSIC","DOT","PLUS","BRACKETS"}[MystVisualConfig.crosshairStyle]);
             drawSmallButton(c, contentLeft + 190, sy + 18, 90, "ЦВЕТ");
             c.drawTextWithShadow(textRenderer, "Размер: " + MystVisualConfig.crosshairSize, contentLeft, sy + 62, MUTED);
             drawSmallButton(c, contentLeft + 170, sy + 54, 54, "−");
