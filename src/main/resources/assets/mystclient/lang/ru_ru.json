@@ -3,5 +3,6 @@
   "modmenu.summaryTranslation.mystclient": "Фиолетовый интерфейс и клиентские визуальные настройки.",
   "modmenu.descriptionTranslation.mystclient": "Mist Visuals — клиентский мод с фиолетовым интерфейсом, разделами HUD, Visuals, Marks, Utilities, Streamer и Configs. Streamer Mode локально заменяет отображаемые ники в TAB только на этом клиенте. Остальные визуальные модули будут подключаться по мере реализации.",
   "key.mystclient.menu": "Открыть меню Mist Visuals",
-  "key.mystclient.zoom": "Приближение Mist Visuals"
+  "key.mystclient.zoom": "Приближение Mist Visuals",
+  "key.mystclient.waypoint": "Сохранить точку Mist Visuals"
 }
