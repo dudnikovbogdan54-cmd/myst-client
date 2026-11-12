@@ -23,7 +23,7 @@ public final class MystScreen extends Screen {
     private static final int PURPLE = 0xFFB58AFF, DARK = 0xFF7042C8;
     private static final int WHITE = 0xFFF2ECFF, MUTED = 0xFF9D91AD;
 
-    public MystScreen() { super(Text.literal("Mist Visuals")); }
+    public MystScreen() { super(Text.literal("Myst Visuals")); }
 
     @Override
     protected void init() {
@@ -50,14 +50,14 @@ public final class MystScreen extends Screen {
     public void render(DrawContext c, int mx, int my, float delta) {
         c.fill(0, 0, width, height, 0xD9080610);
         c.fill(px, py, px + pw, py + ph, PANEL);
-        c.drawTexture(RenderPipelines.GUI_TEXTURED, Identifier.of("mystclient", "textures/gui/mist_background.png"), px, py, 0.0F, 0.0F, pw, ph, 2048, 2048, 0x70FFFFFF);
+        c.drawTexture(RenderPipelines.GUI_TEXTURED, Identifier.of("mystclient", "textures/gui/myst_background.png"), px, py, 0.0F, 0.0F, pw, ph, 1024, 1024, 0x70FFFFFF);
         c.fill(px, py, px + sw, py + ph, 0xF0100C1B);
         c.fill(px + sw - 1, py, px + sw, py + ph, 0xFF30243D);
         c.fill(px + sw, py + 62, px + pw, py + 63, 0xFF30243D);
 
         c.fill(px + 20, py + 18, px + 56, py + 54, DARK);
         c.drawCenteredTextWithShadow(textRenderer, "MV", px + 38, py + 31, WHITE);
-        c.drawTextWithShadow(textRenderer, "MIST", px + 66, py + 22, WHITE);
+        c.drawTextWithShadow(textRenderer, "MYST", px + 66, py + 22, WHITE);
         c.drawTextWithShadow(textRenderer, "VISUALS", px + 66, py + 36, PURPLE);
         c.drawTextWithShadow(textRenderer, "CLIENT MODULES", px + 20, py + 76, MUTED);
 
@@ -72,7 +72,7 @@ public final class MystScreen extends Screen {
             c.drawTextWithShadow(textRenderer, p.label, px + 23, y + 6, active ? WHITE : MUTED);
         }
 
-        c.drawTextWithShadow(textRenderer, "MIST VISUALS  /  " + page.label.toUpperCase(),
+        c.drawTextWithShadow(textRenderer, "MYST VISUALS  /  " + page.label.toUpperCase(),
                 px + sw + 26, py + 22, WHITE);
         c.drawTextWithShadow(textRenderer, "MV  •  CLIENT SETTINGS", px + sw + 26, py + 40, MUTED);
         c.fill(px + pw - 44, py + 16, px + pw - 16, py + 44, 0xFF2A2037);
@@ -80,7 +80,7 @@ public final class MystScreen extends Screen {
 
         drawPage(c);
         super.render(c, mx, my, delta);
-        c.drawTextWithShadow(textRenderer, "MIST VISUALS  •  1.21.11", px + 18, py + ph - 20, 0xFF756A82);
+        c.drawTextWithShadow(textRenderer, "MYST VISUALS  •  1.21.11", px + 18, py + ph - 20, 0xFF756A82);
         c.drawTextWithShadow(textRenderer, "OWNER  ALOXMYST_YT", px + sw + 26, py + ph - 20, 0xFF756A82);
     }
 
@@ -90,7 +90,7 @@ public final class MystScreen extends Screen {
         switch (page) {
             case HUD -> {
                 heading(c, x, y, "HUD", "Экранные элементы — включай нужные и отключай лишние");
-                feature(c,x,y+48,cw,"Watermark","Логотип Mist Visuals","watermark");
+                feature(c,x,y+48,cw,"Watermark","Логотип Myst Visuals","watermark");
                 feature(c,x+cw+gap,y+48,cw,"FPS Counter","Текущая частота кадров","fps");
                 feature(c,x,y+142,cw,"Coordinates","Координаты XYZ игрока","coords");
                 feature(c,x+cw+gap,y+142,cw,"Ping Display","Задержка соединения","ping");
