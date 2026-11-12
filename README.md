@@ -42,3 +42,10 @@ No through-wall player ESP, x-ray, or server-side modifications are included.
 - CPS HUD: left/right click counters with a compact display option.
 - Target HUD: optional target distance and smoothed health-bar animation.
 - HUD panels support saved background and opacity settings.
+
+
+## Myst Visuals 0.5.5
+- Waypoints now create lightweight 3D particle beacons in the world, with a rotating halo and a 96-block render range.
+- Waypoints store their dimension so markers do not appear in a different dimension.
+- Kill Effect is now a world-space particle burst at the tracked target location instead of a flat screen overlay.
+- Menu navigation hitboxes now match the visible sidebar spacing; cards and active navigation have clearer accent/status styling.
