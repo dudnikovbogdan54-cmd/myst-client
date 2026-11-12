@@ -4,236 +4,344 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.util.Identifier;
 import net.minecraft.text.Text;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class MystScreen extends Screen {
     private enum Page {
-        HUD("HUD"), VISUALS("Visuals"), EFFECTS("Effects"), MARKS("Marks"),
-        UTILITIES("Utilities"), STREAMER("Streamer"), CONFIGS("Configs");
-        final String label;
-        Page(String label) { this.label = label; }
+        HUD("HUD", "Экранные элементы"),
+        VISUALS("Visuals", "Визуальные настройки"),
+        EFFECTS("Effects", "Эффекты интерфейса"),
+        MARKS("Marks", "Метки и точки"),
+        UTILITIES("Utilities", "Инструменты"),
+        STREAMER("Streamer", "Режим приватности"),
+        CONFIGS("Configs", "Профили настроек");
+
+        final String label, subtitle;
+        Page(String label, String subtitle) { this.label = label; this.subtitle = subtitle; }
     }
+
+    private record ModuleCard(String id, String title, String description, boolean implemented) {}
 
     private Page page = Page.HUD;
     private TextFieldWidget original, alias;
     private int px, py, pw, ph, sw;
-    private static final int PANEL = 0xB0141021, CARD = 0xE91D172B;
-    private static final int PURPLE = 0xFFB58AFF, DARK = 0xFF7042C8;
-    private static final int WHITE = 0xFFF2ECFF, MUTED = 0xFF9D91AD;
+    private int scrollOffset = 0;
+    private int contentHeight = 0;
+    private boolean resizing = false;
+    private int dragStartX, dragStartY, startWidth, startHeight;
+
+    private static final int MIN_W = 620, MIN_H = 390;
+    private static final int MAX_W = 1160, MAX_H = 760;
+    private static final int PANEL = 0xF0110D1B, SIDEBAR = 0xF00D0A15;
+    private static final int CARD = 0xF01D1728, CARD_HOVER = 0xFF292039;
+    private static final int PURPLE = 0xFFB58AFF, ACCENT = 0xFF8152C5;
+    private static final int WHITE = 0xFFF4F0FA, MUTED = 0xFF9D91AD;
 
     public MystScreen() { super(Text.literal("Myst Visuals")); }
 
     @Override
     protected void init() {
-        pw = Math.min(980, width - 24);
-        ph = Math.min(590, height - 24);
-        px = (width - pw) / 2; py = (height - ph) / 2;
-        sw = Math.max(132, Math.min(184, pw / 5));
-        original = null; alias = null;
+        pw = Math.max(Math.min(MIN_W, width - 16), Math.min(pw == 0 ? 980 : pw, Math.min(MAX_W, width - 16)));
+        ph = Math.max(Math.min(MIN_H, height - 16), Math.min(ph == 0 ? 590 : ph, Math.min(MAX_H, height - 16)));
+        px = (width - pw) / 2;
+        py = (height - ph) / 2;
+        sw = Math.max(138, Math.min(178, pw / 5));
+        clearChildren();
+        original = null;
+        alias = null;
         if (page == Page.STREAMER) {
-            int x = px + sw + 30, y = py + 242, w = Math.min(360, pw - sw - 60);
-            original = new TextFieldWidget(textRenderer, x, y, w, 22, Text.literal("Original nickname"));
+            int x = px + sw + 26;
+            int y = py + 206 - scrollOffset;
+            int w = Math.min(340, pw - sw - 52);
+            original = new TextFieldWidget(textRenderer, x, y, w, 20, Text.literal("Original nickname"));
             original.setPlaceholder(Text.literal("Настоящий ник"));
-            alias = new TextFieldWidget(textRenderer, x, y + 38, w, 22, Text.literal("Display nickname"));
+            alias = new TextFieldWidget(textRenderer, x, y + 34, w, 20, Text.literal("Display nickname"));
             alias.setPlaceholder(Text.literal("Как показывать"));
-            addDrawableChild(original); addDrawableChild(alias);
+            addDrawableChild(original);
+            addDrawableChild(alias);
         }
+        clampScroll();
     }
 
     private void select(Page next) {
-        if (page != next) { page = next; clearChildren(); init(); }
+        if (page != next) {
+            page = next;
+            scrollOffset = 0;
+            init();
+        }
+    }
+
+    private List<ModuleCard> cards() {
+        List<ModuleCard> list = new ArrayList<>();
+        switch (page) {
+            case HUD -> {
+                list.add(new ModuleCard("watermark","Watermark","Логотип Myst Visuals",true));
+                list.add(new ModuleCard("fps","FPS Counter","Частота кадров",true));
+                list.add(new ModuleCard("coords","Coordinates","Координаты XYZ",true));
+                list.add(new ModuleCard("ping","Ping Display","Задержка соединения",true));
+                list.add(new ModuleCard("target_hud","Target HUD","Информация о цели",true));
+                list.add(new ModuleCard("block_info","Block Info","Блок под прицелом",true));
+                list.add(new ModuleCard("keystrokes","Keystrokes","Отображение нажатий",true));
+                list.add(new ModuleCard("cps","CPS Counter","Счётчик кликов",false));
+            }
+            case VISUALS -> {
+                list.add(new ModuleCard("fullbright","Fullbright","Повышенная яркость мира",true));
+                list.add(new ModuleCard("crosshair","Custom Crosshair","Настраиваемый прицел",true));
+                list.add(new ModuleCard("block_overlay","Block Overlay","Подсветка выбранного блока",false));
+                list.add(new ModuleCard("weather_fx","Weather FX","Визуальные эффекты погоды",false));
+                list.add(new ModuleCard("zoom","Zoom","Плавное приближение",true));
+            }
+            case EFFECTS -> {
+                list.add(new ModuleCard("kill_effect","Kill Effect","Декоративный эффект события",true));
+                list.add(new ModuleCard("hit_particles","Hit Particles","Настройка частиц",false));
+                list.add(new ModuleCard("totem_fx","Totem Pop FX","Эффект активации тотема",false));
+                list.add(new ModuleCard("animations","Animations","Анимации интерфейса",false));
+            }
+            case MARKS -> {
+                list.add(new ModuleCard("waypoints","Waypoints","Метки с координатами и дистанцией",true));
+                list.add(new ModuleCard("death_marker","Death Marker","Личная метка последней точки",false));
+            }
+            case UTILITIES -> {
+                list.add(new ModuleCard("zoom","Zoom","Приближение при удержании C",true));
+                list.add(new ModuleCard("keystrokes","Keystrokes","Визуализация клавиш",true));
+                list.add(new ModuleCard("cps","CPS Counter","Счётчик кликов",false));
+            }
+            case STREAMER -> {
+                list.add(new ModuleCard("streamer","Streamer Mode","Локальная замена ников в TAB",true));
+            }
+            case CONFIGS -> {
+                list.add(new ModuleCard("default_profile","Default Profile","Базовый профиль",false));
+                list.add(new ModuleCard("auto_save","Auto Save","Автосохранение настроек",false));
+            }
+        }
+        return list;
+    }
+
+    private boolean isEnabled(String id) {
+        return id.equals("streamer") ? StreamerConfig.enabled : MistConfig.enabled(id);
+    }
+
+    private void toggle(String id) {
+        if (id.equals("streamer")) {
+            StreamerConfig.enabled = !StreamerConfig.enabled;
+            StreamerConfig.save();
+        } else {
+            MistConfig.toggle(id);
+        }
+    }
+
+    private void clampScroll() {
+        int rows = (cards().size() + 1) / 2;
+        contentHeight = 48 + rows * 94;
+        int viewport = Math.max(100, ph - 158);
+        scrollOffset = Math.max(0, Math.min(scrollOffset, Math.max(0, contentHeight - viewport)));
     }
 
     @Override
     public void render(DrawContext c, int mx, int my, float delta) {
-        c.fill(0, 0, width, height, 0xD9080610);
+        c.fill(0, 0, width, height, 0xC9080610);
+        c.fill(px - 5, py - 5, px + pw + 5, py + ph + 5, 0x663D2B56);
         c.fill(px, py, px + pw, py + ph, PANEL);
-        c.drawTexture(RenderPipelines.GUI_TEXTURED, Identifier.of("mystclient", "textures/gui/myst_background.png"), px, py, 0.0F, 0.0F, pw, ph, 1024, 1024, 0x70FFFFFF);
-        c.fill(px, py, px + sw, py + ph, 0xF0100C1B);
-        c.fill(px + sw - 1, py, px + sw, py + ph, 0xFF30243D);
-        c.fill(px + sw, py + 62, px + pw, py + 63, 0xFF30243D);
+        c.fill(px, py, px + sw, py + ph, SIDEBAR);
+        c.fill(px + sw - 1, py, px + sw, py + ph, 0xFF352844);
+        c.fill(px + sw, py + 66, px + pw, py + 67, 0xFF352844);
 
-        c.fill(px + 20, py + 18, px + 56, py + 54, DARK);
-        c.drawCenteredTextWithShadow(textRenderer, "MV", px + 38, py + 31, WHITE);
-        c.drawTextWithShadow(textRenderer, "MYST", px + 66, py + 22, WHITE);
-        c.drawTextWithShadow(textRenderer, "VISUALS", px + 66, py + 36, PURPLE);
-        c.drawTextWithShadow(textRenderer, "CLIENT MODULES", px + 20, py + 76, MUTED);
+        c.fill(px + 18, py + 17, px + 52, py + 51, ACCENT);
+        c.drawCenteredTextWithShadow(textRenderer, "M", px + 35, py + 28, WHITE);
+        c.drawTextWithShadow(textRenderer, "MYST", px + 62, py + 19, WHITE);
+        c.drawTextWithShadow(textRenderer, "VISUALS", px + 62, py + 34, PURPLE);
+        c.drawTextWithShadow(textRenderer, "CLIENT MENU", px + 18, py + 75, MUTED);
 
         int navY = py + 100;
         for (Page p : Page.values()) {
-            int y = navY + p.ordinal() * 42;
+            int y = navY + p.ordinal() * 39;
             boolean active = p == page;
             if (active) {
-                c.fill(px + 10, y - 4, px + sw - 10, y + 27, 0xFF392653);
-                c.fill(px + 10, y - 4, px + 13, y + 27, PURPLE);
+                c.fill(px + 9, y - 4, px + sw - 9, y + 27, 0xFF332445);
+                c.fill(px + 9, y - 4, px + 12, y + 27, PURPLE);
             }
-            c.drawTextWithShadow(textRenderer, p.label, px + 23, y + 6, active ? WHITE : MUTED);
+            c.drawTextWithShadow(textRenderer, p.label, px + 21, y + 6, active ? WHITE : MUTED);
         }
 
-        c.drawTextWithShadow(textRenderer, "MYST VISUALS  /  " + page.label.toUpperCase(),
-                px + sw + 26, py + 22, WHITE);
-        c.drawTextWithShadow(textRenderer, "MV  •  CLIENT SETTINGS", px + sw + 26, py + 40, MUTED);
-        c.fill(px + pw - 44, py + 16, px + pw - 16, py + 44, 0xFF2A2037);
-        c.drawCenteredTextWithShadow(textRenderer, "×", px + pw - 30, py + 24, WHITE);
+        int headX = px + sw + 24;
+        c.drawTextWithShadow(textRenderer, page.label.toUpperCase(), headX, py + 19, WHITE);
+        c.drawTextWithShadow(textRenderer, page.subtitle, headX, py + 37, MUTED);
+        drawSmallButton(c, px + pw - 112, py + 17, 26, "−");
+        drawSmallButton(c, px + pw - 80, py + 17, 26, "+");
+        drawSmallButton(c, px + pw - 43, py + 17, 26, "×");
+        c.drawTextWithShadow(textRenderer, pw + " × " + ph, px + pw - 112, py + 48, MUTED);
 
-        drawPage(c);
+        int contentTop = py + 82;
+        int contentBottom = py + ph - 38;
+        int contentLeft = px + sw + 24;
+        int contentRight = px + pw - 20;
+        c.enableScissor(contentLeft, contentTop, contentRight, contentBottom);
+        List<ModuleCard> list = cards();
+        int gap = 12;
+        int cw = Math.max(150, (contentRight - contentLeft - gap) / 2);
+        int row = 0;
+        for (int i = 0; i < list.size(); i++) {
+            ModuleCard card = list.get(i);
+            int col = i % 2;
+            row = i / 2;
+            int x = contentLeft + col * (cw + gap);
+            int y = contentTop + 4 + row * 94 - scrollOffset;
+            boolean hovered = mx >= x && mx <= x + cw && my >= y && my <= y + 80;
+            c.fill(x, y, x + cw, y + 80, hovered ? CARD_HOVER : CARD);
+            c.fill(x, y, x + 3, y + 80, card.implemented ? ACCENT : 0xFF51465D);
+            c.drawTextWithShadow(textRenderer, card.title, x + 13, y + 13, WHITE);
+            c.drawTextWithShadow(textRenderer, card.description, x + 13, y + 34, MUTED);
+            if (card.implemented) {
+                boolean enabled = isEnabled(card.id);
+                int sx = x + cw - 54;
+                c.fill(sx, y + 54, sx + 40, y + 72, enabled ? 0xFF7145A7 : 0xFF403849);
+                c.fill(enabled ? sx + 22 : sx + 2, y + 56, enabled ? sx + 38 : sx + 18, y + 70, WHITE);
+                c.drawTextWithShadow(textRenderer, enabled ? "ON" : "OFF", sx - 27, y + 58, enabled ? PURPLE : MUTED);
+            } else {
+                c.drawTextWithShadow(textRenderer, "SOON", x + cw - 45, y + 59, MUTED);
+            }
+        }
+        if (page == Page.STREAMER) {
+            c.drawTextWithShadow(textRenderer, "НАСТОЯЩИЙ НИК", contentLeft, contentTop + 170 - scrollOffset, MUTED);
+            c.drawTextWithShadow(textRenderer, "КАК ПОКАЗЫВАТЬ", contentLeft, contentTop + 225 - scrollOffset, MUTED);
+            drawSmallButton(c, contentLeft, contentTop + 258 - scrollOffset, 142, "СОХРАНИТЬ НИК");
+            c.drawTextWithShadow(textRenderer, "Замена действует только локально.", contentLeft + 154, contentTop + 266 - scrollOffset, MUTED);
+        }
+        c.disableScissor();
+
+        c.drawTextWithShadow(textRenderer, "КОЛЁСИКО — ПРОКРУТКА", px + 18, py + ph - 20, 0xFF756A82);
+        c.drawTextWithShadow(textRenderer, "MYST VISUALS  •  1.21.11", contentLeft, py + ph - 20, 0xFF756A82);
+        c.fill(px + pw - 16, py + ph - 16, px + pw - 5, py + ph - 5, PURPLE);
         super.render(c, mx, my, delta);
-        c.drawTextWithShadow(textRenderer, "MYST VISUALS  •  1.21.11", px + 18, py + ph - 20, 0xFF756A82);
-        c.drawTextWithShadow(textRenderer, "OWNER  ALOXMYST_YT", px + sw + 26, py + ph - 20, 0xFF756A82);
     }
 
-    private void drawPage(DrawContext c) {
-        int x = px + sw + 26, y = py + 82, gap = 14;
-        int available = pw - sw - 52, cw = (available - gap) / 2;
-        switch (page) {
-            case HUD -> {
-                heading(c, x, y, "HUD", "Экранные элементы — включай нужные и отключай лишние");
-                feature(c,x,y+48,cw,"Watermark","Логотип Myst Visuals","watermark");
-                feature(c,x+cw+gap,y+48,cw,"FPS Counter","Текущая частота кадров","fps");
-                feature(c,x,y+142,cw,"Coordinates","Координаты XYZ игрока","coords");
-                feature(c,x+cw+gap,y+142,cw,"Ping Display","Задержка соединения","ping");
-                feature(c,x,y+236,cw,"Target HUD","Здоровье существа под прицелом","target_hud");
-                feature(c,x+cw+gap,y+236,cw,"Block Info","Название блока под прицелом","block_info");
-            }
-            case VISUALS -> {
-                heading(c,x,y,"VISUALS","Визуальные настройки мира и интерфейса");
-                feature(c,x,y+48,cw,"Block Overlay","Подсветка выбранного блока","block_overlay");
-                feature(c,x+cw+gap,y+48,cw,"Custom Crosshair","Настраиваемый прицел","crosshair");
-                feature(c,x,y+142,cw,"Fullbright","Повышенная яркость мира","fullbright");
-                feature(c,x+cw+gap,y+142,cw,"Clear Weather FX","Снижение визуального шума погоды","weather_fx");
-            }
-            case EFFECTS -> {
-                heading(c,x,y,"EFFECTS","Локальные визуальные эффекты событий");
-                feature(c,x,y+48,cw,"Kill Effect","Декоративный эффект после победы","kill_effect");
-                feature(c,x+cw+gap,y+48,cw,"Hit Particles","Настройка декоративных частиц","hit_particles");
-                feature(c,x,y+142,cw,"Totem Pop FX","Оформление эффекта тотема","totem_fx");
-                feature(c,x+cw+gap,y+142,cw,"Animations","Плавность интерфейсных анимаций","animations");
-            }
-            case MARKS -> {
-                heading(c,x,y,"MARKS","Личные метки и точки интереса");
-                feature(c,x,y+48,cw,"Waypoints","ЛКМ: включить • ПКМ: список и настройки меток","waypoints");
-                feature(c,x+cw+gap,y+48,cw,"Death Marker","Личная метка места смерти","death_marker");
-            }
-            case UTILITIES -> {
-                heading(c,x,y,"UTILITIES","Инструменты комфорта");
-                feature(c,x,y+48,cw,"Zoom","Приближение при удержании C","zoom");
-                feature(c,x+cw+gap,y+48,cw,"Keystrokes","Отображение нажатий клавиш","keystrokes");
-                feature(c,x,y+142,cw,"CPS Counter","Счётчик кликов","cps");
-            }
-            case STREAMER -> {
-                heading(c,x,y,"STREAMER MODE","Локальная приватность отображения");
-                feature(c,x,y+48,Math.min(430,available),"Streamer Mode","Замена ников в TAB только на этом клиенте","streamer");
-                c.drawTextWithShadow(textRenderer,"НАСТОЯЩИЙ НИК",x,y+145,MUTED);
-                c.drawTextWithShadow(textRenderer,"КАК ПОКАЗЫВАТЬ",x,y+184,MUTED);
-                c.fill(x,y+228,x+150,y+258,DARK);
-                c.drawCenteredTextWithShadow(textRenderer,"СОХРАНИТЬ НИК",x+75,y+238,WHITE);
-                c.drawTextWithShadow(textRenderer,"Замены не меняют аккаунты и серверные ники.",x,y+278,MUTED);
-            }
-            case CONFIGS -> {
-                heading(c,x,y,"CONFIGS","Профили и сохранение настроек");
-                feature(c,x,y+48,cw,"Default Profile","Базовый набор настроек","default_profile");
-                feature(c,x+cw+gap,y+48,cw,"Auto Save","Автоматическое сохранение модулей","auto_save");
-                c.drawTextWithShadow(textRenderer,"Конфигурация хранится локально в папке config.",x,y+160,MUTED);
-            }
-        }
+    private void drawSmallButton(DrawContext c, int x, int y, int w, String label) {
+        c.fill(x, y, x + w, y + 25, 0xFF382A4A);
+        c.drawCenteredTextWithShadow(textRenderer, label, x + w / 2, y + 8, WHITE);
     }
 
-    private void heading(DrawContext c,int x,int y,String title,String subtitle) {
-        c.drawTextWithShadow(textRenderer,title,x,y,PURPLE);
-        c.drawTextWithShadow(textRenderer,subtitle,x,y+18,MUTED);
-    }
-
-    private void feature(DrawContext c,int x,int y,int w,String title,String desc,String id) {
-        boolean implemented = id.equals("streamer") || id.equals("watermark") || id.equals("fps")
-                || id.equals("coords") || id.equals("ping") || id.equals("target_hud") || id.equals("block_info")
-                || id.equals("crosshair") || id.equals("keystrokes") || id.equals("kill_effect") || id.equals("zoom") || id.equals("fullbright") || id.equals("waypoints");
-        boolean on = id.equals("streamer") ? StreamerConfig.enabled : MistConfig.enabled(id);
-        c.fill(x,y,x+w,y+78,CARD);
-        c.fill(x,y,x+3,y+78,0xFF594078);
-        c.drawTextWithShadow(textRenderer,title,x+14,y+14,WHITE);
-        c.drawTextWithShadow(textRenderer,desc,x+14,y+36,MUTED);
-        if (implemented) {
-            int sx=x+w-58;
-            c.fill(sx,y+12,sx+42,y+32,on?0xFF8255C5:0xFF403849);
-            c.fill(on?sx+23:sx+3,y+14,on?sx+39:sx+19,y+30,WHITE);
-            c.drawTextWithShadow(textRenderer,on?"ON":"OFF",sx-28,y+18,on?PURPLE:MUTED);
-        } else {
-            c.drawTextWithShadow(textRenderer,"SOON",x+w-48,y+18,MUTED);
-        }
-    }
-
-    private void toggleAt(double mx,double my,int x,int y,int w,String id) {
-        boolean implemented = id.equals("streamer") || id.equals("watermark") || id.equals("fps")
-                || id.equals("coords") || id.equals("ping") || id.equals("target_hud") || id.equals("block_info")
-                || id.equals("crosshair") || id.equals("keystrokes") || id.equals("kill_effect") || id.equals("zoom") || id.equals("fullbright") || id.equals("waypoints");
-        if (!implemented) return;
-        if (mx>=x && mx<=x+w && my>=y && my<=y+78) {
-            if (id.equals("streamer")) { StreamerConfig.enabled=!StreamerConfig.enabled; StreamerConfig.save(); }
-            else MistConfig.toggle(id);
-        }
+    private void rebuild() {
+        init();
     }
 
     @Override
     public boolean mouseClicked(Click click, boolean doubled) {
         double mx = click.x(), my = click.y();
-        if (page == Page.STREAMER && click.button() == 0 && original != null && alias != null) {
-            int fieldX = px + sw + 30;
-            int fieldY = py + 242;
-            int fieldW = Math.min(360, pw - sw - 60);
-            if ((mx >= fieldX && mx <= fieldX + fieldW && my >= fieldY && my <= fieldY + 22)
-                    || (mx >= fieldX && mx <= fieldX + fieldW && my >= fieldY + 38 && my <= fieldY + 60)) {
-                return super.mouseClicked(click, doubled);
+        if (click.button() == 0 && mx >= px + pw - 20 && my >= py + ph - 20) {
+            resizing = true;
+            dragStartX = (int) mx;
+            dragStartY = (int) my;
+            startWidth = pw;
+            startHeight = ph;
+            return true;
+        }
+        if (click.button() == 0 && my >= py + 12 && my <= py + 48) {
+            if (mx >= px + pw - 114 && mx < px + pw - 84) {
+                pw = Math.min(Math.min(MAX_W, width - 16), pw + 55);
+                ph = Math.min(Math.min(MAX_H, height - 16), ph + 35);
+                rebuild();
+                return true;
+            }
+            if (mx >= px + pw - 82 && mx < px + pw - 52) {
+                pw = Math.max(Math.min(MIN_W, width - 16), pw - 55);
+                ph = Math.max(Math.min(MIN_H, height - 16), ph - 35);
+                rebuild();
+                return true;
+            }
+            if (mx >= px + pw - 46) { close(); return true; }
+        }
+        if (click.button() == 0) {
+            int navY = py + 100;
+            for (Page p : Page.values()) {
+                int y = navY + p.ordinal() * 39;
+                if (mx >= px + 8 && mx <= px + sw - 8 && my >= y - 5 && my <= y + 28) {
+                    select(p);
+                    return true;
+                }
+            }
+            int contentTop = py + 82, contentBottom = py + ph - 38;
+            int contentLeft = px + sw + 24, contentRight = px + pw - 20;
+            if (mx >= contentLeft && mx <= contentRight && my >= contentTop && my <= contentBottom) {
+                List<ModuleCard> list = cards();
+                int gap = 12, cw = Math.max(150, (contentRight - contentLeft - gap) / 2);
+                for (int i = 0; i < list.size(); i++) {
+                    ModuleCard card = list.get(i);
+                    int col = i % 2, row = i / 2;
+                    int x = contentLeft + col * (cw + gap);
+                    int y = contentTop + 4 + row * 94 - scrollOffset;
+                    if (mx >= x && mx <= x + cw && my >= y && my <= y + 80 && card.implemented) {
+                        if (card.id.equals("waypoints") && click.button() == 1) {
+                            client.setScreen(new WaypointScreen(this));
+                        } else {
+                            toggle(card.id);
+                        }
+                        return true;
+                    }
+                }
+                if (page == Page.STREAMER && original != null && alias != null) {
+                    if (mx >= contentLeft && mx <= contentLeft + 142
+                            && my >= contentTop + 258 - scrollOffset && my <= contentTop + 283 - scrollOffset) {
+                        String from = original.getText().trim(), to = alias.getText().trim();
+                        if (!from.isEmpty() && !to.isEmpty()) {
+                            StreamerConfig.aliases.put(from, to);
+                            StreamerConfig.save();
+                            original.setText("");
+                            alias.setText("");
+                        }
+                        return true;
+                    }
+                }
             }
         }
-        if (click.button()==1 && page == Page.MARKS) {
-            int x=px+sw+26, y=py+82, available=pw-sw-52, cw=(available-14)/2;
-            if (mx>=x && mx<=x+cw && my>=y+48 && my<=y+126) {
+        if (click.button() == 1 && page == Page.MARKS) {
+            int contentLeft = px + sw + 24, contentTop = py + 82;
+            int cw = Math.max(150, (pw - sw - 68) / 2);
+            if (mx >= contentLeft && mx <= contentLeft + cw
+                    && my >= contentTop + 4 - scrollOffset && my <= contentTop + 84 - scrollOffset) {
                 client.setScreen(new WaypointScreen(this));
                 return true;
             }
         }
-        if (click.button()==0) {
-            int navY=py+100;
-            for(Page p:Page.values()) {
-                int y=navY+p.ordinal()*42;
-                if(mx>=px+8&&mx<=px+sw-8&&my>=y-5&&my<=y+28){select(p);return true;}
-            }
-            if(mx>=px+pw-48&&mx<=px+pw-12&&my>=py+12&&my<=py+48){close();return true;}
-            int x=px+sw+26,y=py+82,gap=14,available=pw-sw-52,cw=(available-gap)/2;
-            switch(page) {
-                case HUD -> {
-                    toggleAt(mx,my,x,y+48,cw,"watermark"); toggleAt(mx,my,x+cw+gap,y+48,cw,"fps");
-                    toggleAt(mx,my,x,y+142,cw,"coords"); toggleAt(mx,my,x+cw+gap,y+142,cw,"ping");
-                    toggleAt(mx,my,x,y+236,cw,"target_hud"); toggleAt(mx,my,x+cw+gap,y+236,cw,"block_info");
-                }
-                case VISUALS -> {
-                    toggleAt(mx,my,x,y+48,cw,"block_overlay"); toggleAt(mx,my,x+cw+gap,y+48,cw,"crosshair");
-                    toggleAt(mx,my,x,y+142,cw,"fullbright"); toggleAt(mx,my,x+cw+gap,y+142,cw,"weather_fx");
-                }
-                case EFFECTS -> {
-                    toggleAt(mx,my,x,y+48,cw,"kill_effect"); toggleAt(mx,my,x+cw+gap,y+48,cw,"hit_particles");
-                    toggleAt(mx,my,x,y+142,cw,"totem_fx"); toggleAt(mx,my,x+cw+gap,y+142,cw,"animations");
-                }
-                case MARKS -> { toggleAt(mx,my,x,y+48,cw,"waypoints"); toggleAt(mx,my,x+cw+gap,y+48,cw,"death_marker"); }
-                case UTILITIES -> {
-                    toggleAt(mx,my,x,y+48,cw,"zoom"); toggleAt(mx,my,x+cw+gap,y+48,cw,"keystrokes");
-                    toggleAt(mx,my,x,y+142,cw,"cps");
-                }
-                case STREAMER -> {
-                    toggleAt(mx,my,x,y+48,Math.min(430,available),"streamer");
-                    if(mx>=x&&mx<=x+150&&my>=y+228&&my<=y+258&&original!=null&&alias!=null) {
-                        String from=original.getText().trim(),to=alias.getText().trim();
-                        if(!from.isEmpty()&&!to.isEmpty()){StreamerConfig.aliases.put(from,to);StreamerConfig.save();original.setText("");alias.setText("");}
-                    }
-                }
-                case CONFIGS -> { toggleAt(mx,my,x,y+48,cw,"default_profile"); toggleAt(mx,my,x+cw+gap,y+48,cw,"auto_save"); }
-            }
-            return true;
-        }
-        return super.mouseClicked(click,doubled);
+        return super.mouseClicked(click, doubled);
     }
 
-    @Override public boolean shouldPause(){return false;}
+    @Override
+    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+        if (resizing && click.button() == 0) {
+            pw = Math.max(Math.min(MIN_W, width - 16), Math.min(Math.min(MAX_W, width - 16), startWidth + (int)(click.x() - dragStartX)));
+            ph = Math.max(Math.min(MIN_H, height - 16), Math.min(Math.min(MAX_H, height - 16), startHeight + (int)(click.y() - dragStartY)));
+            px = (width - pw) / 2;
+            py = (height - ph) / 2;
+            return true;
+        }
+        return super.mouseDragged(click, offsetX, offsetY);
+    }
+
+    @Override
+    public boolean mouseReleased(Click click) {
+        if (resizing) {
+            resizing = false;
+            rebuild();
+            return true;
+        }
+        return super.mouseReleased(click);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        int left = px + sw + 24, right = px + pw - 20;
+        int top = py + 82, bottom = py + ph - 38;
+        if (mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom) {
+            scrollOffset -= (int)(verticalAmount * 34);
+            clampScroll();
+            if (page == Page.STREAMER) rebuild();
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+    }
+
+    @Override public boolean shouldPause() { return false; }
 }
