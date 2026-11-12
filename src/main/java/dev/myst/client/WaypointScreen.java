@@ -44,7 +44,7 @@ public final class WaypointScreen extends Screen {
         c.fill(0, 0, width, height, 0xD9080610);
         c.fill(left, top, left + widthPanel, top + 454, PANEL);
         c.drawTextWithShadow(textRenderer, "WAYPOINT MANAGER", left + 22, top + 18, PURPLE);
-        c.drawTextWithShadow(textRenderer, "Создавай метки по точным координатам", left + 22, top + 38, MUTED);
+        c.drawTextWithShadow(textRenderer, "3D-ориентир в мире • частицы • расстояние", left + 22, top + 38, MUTED);
         c.drawTextWithShadow(textRenderer, "НАЗВАНИЕ", left + 22, top + 67, MUTED);
         c.drawTextWithShadow(textRenderer, "КООРДИНАТЫ X / Y / Z", left + 22, top + 116, MUTED);
         c.drawTextWithShadow(textRenderer, "Расстояние: " + (showDistance ? "ВКЛ" : "ВЫКЛ") + "  (нажми, чтобы переключить)",
@@ -113,6 +113,7 @@ public final class WaypointScreen extends Screen {
                 p.z = z;
                 p.showDistance = showDistance;
                 p.color = selectedColor;
+                p.dimension = MistConfig.currentDimension();
                 p.enabled = true;
             } else {
                 MistConfig.addWaypoint(name, x, y, z);
