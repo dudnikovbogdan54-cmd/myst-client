@@ -55,3 +55,8 @@ No through-wall player ESP, x-ray, or server-side modifications are included.
 - Rebuilt the ClickGUI with responsive one/two-column layouts, rounded panels and controls, aligned switches, text truncation and consistent spacing.
 - Added Direction and Speed HUD widgets.
 - Streamer nickname fields are aligned with their labels and save control.
+
+
+## Build on GitHub (Android-friendly)
+
+You do not need to install Gradle on Android. Every push to `main` starts the GitHub Actions build. Open the repository's **Actions** tab and select **Build Myst Visuals**. When the run succeeds, download the `Myst-Visuals-1.21.11` artifact from the run, or open **Releases** to download the published JAR. The artifact is a build of this repository's current source; check the run status before installing it.
