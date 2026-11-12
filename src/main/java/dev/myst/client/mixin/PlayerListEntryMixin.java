@@ -13,7 +13,7 @@ public abstract class PlayerListEntryMixin {
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
     private void mystclient$replaceTabName(CallbackInfoReturnable<Text> cir) {
         PlayerListEntry self = (PlayerListEntry)(Object)this;
-        String original = self.getProfile().getName();
+        String original = self.getProfile().name();
         String replacement = StreamerConfig.replace(original);
         if (!replacement.equals(original)) cir.setReturnValue(Text.literal(replacement));
     }
