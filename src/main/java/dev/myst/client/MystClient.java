@@ -20,6 +20,7 @@ public final class MystClient implements ClientModInitializer {
                 "key.mystclient.menu", InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT_SHIFT, KeyBinding.Category.MISC));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            MistHud.tick();
             while (openMenu.wasPressed()) client.setScreen(new MystScreen());
         });
     }
