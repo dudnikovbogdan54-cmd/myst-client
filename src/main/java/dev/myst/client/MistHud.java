@@ -63,6 +63,22 @@ public final class MistHud {
             ctx.drawTextWithShadow(mc.textRenderer, cpsText, 14, y + 6, 0xFFF1E9FF);
             y += 24;
         }
+        if (MistConfig.enabled("direction")) {
+            int quadrant = Math.floorMod((int)Math.floor(mc.player.getYaw() / 90.0F + 0.5F), 4);
+            String[] directions = {"S", "W", "N", "E"};
+            String directionText = "Facing  " + directions[quadrant];
+            panel(ctx, 8, y, mc.textRenderer.getWidth(directionText) + 14, 20);
+            ctx.drawTextWithShadow(mc.textRenderer, directionText, 14, y + 6, 0xFFF1E9FF);
+            y += 24;
+        }
+        if (MistConfig.enabled("speed")) {
+            double velocity = Math.sqrt(mc.player.getVelocity().x * mc.player.getVelocity().x
+                    + mc.player.getVelocity().z * mc.player.getVelocity().z) * 20.0;
+            String speedText = String.format(java.util.Locale.ROOT, "Speed  %.2f m/s", velocity);
+            panel(ctx, 8, y, mc.textRenderer.getWidth(speedText) + 14, 20);
+            ctx.drawTextWithShadow(mc.textRenderer, speedText, 14, y + 6, 0xFFF1E9FF);
+            y += 24;
+        }
         if (MistConfig.enabled("target_hud") && mc.targetedEntity instanceof LivingEntity target && target.isAlive()) {
             int x = ctx.getScaledWindowWidth() / 2 + 12;
             int ty = ctx.getScaledWindowHeight() / 2 + 8;
