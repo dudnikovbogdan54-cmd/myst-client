@@ -11,6 +11,8 @@ public final class WaypointScreen extends Screen {
     private TextFieldWidget nameField, xField, yField, zField;
     private int selected = -1;
     private boolean showDistance = true;
+    private int selectedColor = 0xFFB58AFF;
+    private static final int[] COLORS = {0xFFB58AFF, 0xFF55D6FF, 0xFF65E39A, 0xFFFFD166, 0xFFFF7B9C, 0xFFFFFFFF};
     private static final int PANEL = 0xF0141021, CARD = 0xE91D172B;
     private static final int PURPLE = 0xFFB58AFF, WHITE = 0xFFF2ECFF, MUTED = 0xFF9D91AD;
     private int left, top, widthPanel;
@@ -23,7 +25,7 @@ public final class WaypointScreen extends Screen {
     @Override protected void init() {
         widthPanel = Math.min(620, width - 24);
         left = (width - widthPanel) / 2;
-        top = Math.max(12, (height - 430) / 2);
+        top = Math.max(12, (height - 454) / 2);
         int fx = left + 22, fw = Math.min(260, widthPanel - 44);
         nameField = new TextFieldWidget(textRenderer, fx, top + 83, fw, 20, Text.literal("Название"));
         nameField.setMaxLength(32);
@@ -35,7 +37,7 @@ public final class WaypointScreen extends Screen {
 
     @Override public void render(DrawContext c, int mx, int my, float delta) {
         c.fill(0, 0, width, height, 0xD9080610);
-        c.fill(left, top, left + widthPanel, top + 430, PANEL);
+        c.fill(left, top, left + widthPanel, top + 454, PANEL);
         c.drawTextWithShadow(textRenderer, "WAYPOINT MANAGER", left + 22, top + 18, PURPLE);
         c.drawTextWithShadow(textRenderer, "Создавай метки по точным координатам", left + 22, top + 38, MUTED);
         c.drawTextWithShadow(textRenderer, "НАЗВАНИЕ", left + 22, top + 67, MUTED);
@@ -68,12 +70,12 @@ public final class WaypointScreen extends Screen {
         c.drawCenteredTextWithShadow(textRenderer, label, x + w / 2, y + 8, WHITE);
     }
 
-    private void loadSelected() {
+    private String colorName(int color) {\n        return switch (color) { case 0xFF55D6FF -> "Голубой"; case 0xFF65E39A -> "Зелёный"; case 0xFFFFD166 -> "Жёлтый"; case 0xFFFF7B9C -> "Розовый"; case 0xFFFFFFFF -> "Белый"; default -> "Фиолетовый"; };\n    }\n\n    private void loadSelected() {
         if (selected < 0 || selected >= MistConfig.waypoints.size()) return;
         MistConfig.Waypoint p = MistConfig.waypoints.get(selected);
         nameField.setText(p.name);
         xField.setText(Double.toString(p.x)); yField.setText(Double.toString(p.y)); zField.setText(Double.toString(p.z));
-        showDistance = p.showDistance;
+        showDistance = p.showDistance;\n        selectedColor = p.color;
     }
 
     private void savePoint() {
@@ -85,11 +87,11 @@ public final class WaypointScreen extends Screen {
             if (selected >= 0 && selected < MistConfig.waypoints.size()) {
                 MistConfig.Waypoint p = MistConfig.waypoints.get(selected);
                 p.name = name.isEmpty() ? p.name : name;
-                p.x = x; p.y = y; p.z = z; p.showDistance = showDistance; p.enabled = true;
+                p.x = x; p.y = y; p.z = z; p.showDistance = showDistance; p.color = selectedColor; p.enabled = true;
             } else {
                 MistConfig.addWaypoint(name, x, y, z);
                 selected = MistConfig.waypoints.size() - 1;
-                MistConfig.waypoints.get(selected).showDistance = showDistance;
+                MistConfig.waypoints.get(selected).showDistance = showDistance;\n                MistConfig.waypoints.get(selected).color = selectedColor;
             }
             MistConfig.save();
         } catch (NumberFormatException ignored) { }
@@ -124,7 +126,7 @@ public final class WaypointScreen extends Screen {
                     return true;
                 }
             }
-            if (my >= top + 410 && my <= top + 434) {
+            if (my >= top + 430 && my <= top + 454) {
                 if (mx < left + 145 && selected >= 0 && selected < MistConfig.waypoints.size()) {
                     MistConfig.waypoints.remove(selected); selected = -1; MistConfig.save();
                     nameField.setText(""); xField.setText(""); yField.setText(""); zField.setText("");
