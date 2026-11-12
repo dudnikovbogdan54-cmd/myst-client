@@ -10,9 +10,15 @@ import org.lwjgl.glfw.GLFW;
 public final class MystClient implements ClientModInitializer {
     public static final String MOD_ID = "mystclient";
     private static KeyBinding openMenu;
-    @Override public void onInitializeClient() {
+
+    @Override
+    public void onInitializeClient() {
         StreamerConfig.load();
-        openMenu = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.mystclient.menu", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, KeyBinding.Category.MISC));
+        MistConfig.load();
+        MistHud.register();
+        openMenu = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.mystclient.menu", InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_RIGHT_SHIFT, KeyBinding.Category.MISC));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (openMenu.wasPressed()) client.setScreen(new MystScreen());
         });
