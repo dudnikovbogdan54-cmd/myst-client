@@ -178,6 +178,15 @@ public final class MystScreen extends Screen {
     @Override
     public boolean mouseClicked(Click click, boolean doubled) {
         double mx = click.x(), my = click.y();
+        if (page == Page.STREAMER && click.button() == 0 && original != null && alias != null) {
+            int fieldX = px + sw + 30;
+            int fieldY = py + 242;
+            int fieldW = Math.min(360, pw - sw - 60);
+            if ((mx >= fieldX && mx <= fieldX + fieldW && my >= fieldY && my <= fieldY + 22)
+                    || (mx >= fieldX && mx <= fieldX + fieldW && my >= fieldY + 38 && my <= fieldY + 60)) {
+                return super.mouseClicked(click, doubled);
+            }
+        }
         if (click.button()==0) {
             int navY=py+100;
             for(Page p:Page.values()) {
