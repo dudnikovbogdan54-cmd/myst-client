@@ -113,7 +113,7 @@ public final class MystScreen extends Screen {
             }
             case MARKS -> {
                 heading(c,x,y,"MARKS","Личные метки и точки интереса");
-                feature(c,x,y+48,cw,"Waypoints","Сохранённые точки на карте","waypoints");
+                feature(c,x,y+48,cw,"Waypoints","Сохранить текущую точку клавишей B","waypoints");
                 feature(c,x+cw+gap,y+48,cw,"Death Marker","Личная метка места смерти","death_marker");
             }
             case UTILITIES -> {
@@ -148,7 +148,7 @@ public final class MystScreen extends Screen {
     private void feature(DrawContext c,int x,int y,int w,String title,String desc,String id) {
         boolean implemented = id.equals("streamer") || id.equals("watermark") || id.equals("fps")
                 || id.equals("coords") || id.equals("ping") || id.equals("target_hud") || id.equals("block_info")
-                || id.equals("crosshair") || id.equals("keystrokes") || id.equals("kill_effect") || id.equals("zoom");
+                || id.equals("crosshair") || id.equals("keystrokes") || id.equals("kill_effect") || id.equals("zoom") || id.equals("fullbright") || id.equals("waypoints");
         boolean on = id.equals("streamer") ? StreamerConfig.enabled : MistConfig.enabled(id);
         c.fill(x,y,x+w,y+78,CARD);
         c.fill(x,y,x+3,y+78,0xFF594078);
@@ -167,7 +167,7 @@ public final class MystScreen extends Screen {
     private void toggleAt(double mx,double my,int x,int y,int w,String id) {
         boolean implemented = id.equals("streamer") || id.equals("watermark") || id.equals("fps")
                 || id.equals("coords") || id.equals("ping") || id.equals("target_hud") || id.equals("block_info")
-                || id.equals("crosshair") || id.equals("keystrokes") || id.equals("kill_effect") || id.equals("zoom");
+                || id.equals("crosshair") || id.equals("keystrokes") || id.equals("kill_effect") || id.equals("zoom") || id.equals("fullbright") || id.equals("waypoints");
         if (!implemented) return;
         if (mx>=x && mx<=x+w && my>=y && my<=y+78) {
             if (id.equals("streamer")) { StreamerConfig.enabled=!StreamerConfig.enabled; StreamerConfig.save(); }
