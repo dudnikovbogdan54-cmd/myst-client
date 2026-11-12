@@ -211,6 +211,15 @@ public final class MystScreen extends Screen {
             c.drawTextWithShadow(textRenderer, "Замена действует только локально.", contentLeft + 154, contentTop + 266 - scrollOffset, MUTED);
         }
         c.disableScissor();
+        int viewportHeight = contentBottom - contentTop;
+        if (contentHeight > viewportHeight) {
+            int trackX = contentRight - 5;
+            c.fill(trackX, contentTop + 3, trackX + 3, contentBottom - 3, 0xFF30283A);
+            int thumbHeight = Math.max(24, viewportHeight * viewportHeight / contentHeight);
+            int maxScroll = Math.max(1, contentHeight - viewportHeight);
+            int thumbY = contentTop + 3 + (viewportHeight - thumbHeight) * scrollOffset / maxScroll;
+            c.fill(trackX - 1, thumbY, trackX + 4, thumbY + thumbHeight, PURPLE);
+        }
 
         c.drawTextWithShadow(textRenderer, "КОЛЁСИКО — ПРОКРУТКА", px + 18, py + ph - 20, 0xFF756A82);
         c.drawTextWithShadow(textRenderer, "MYST VISUALS  •  1.21.11", contentLeft, py + ph - 20, 0xFF756A82);
