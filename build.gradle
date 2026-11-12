@@ -27,9 +27,11 @@ processResources {
     }
 }
 
+// Loom 1.18.2 requires JDK 25 to run its Gradle plugin.
+// The compiled mod is still explicitly targeted to Java 21 below.
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
     withSourcesJar()
 }
