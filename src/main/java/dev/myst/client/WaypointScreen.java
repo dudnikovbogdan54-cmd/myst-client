@@ -18,7 +18,7 @@ public final class WaypointScreen extends Screen {
     private int left, top, widthPanel;
 
     public WaypointScreen(Screen parent) {
-        super(Text.literal("Mist Visuals — Waypoints"));
+        super(Text.literal("Myst Visuals — Waypoints"));
         this.parent = parent;
     }
 
