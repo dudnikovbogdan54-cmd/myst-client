@@ -162,14 +162,14 @@ public final class MistHud {
             double dx = x - px, dy = y - py, dz = z - pz;
             if (dx * dx + dy * dy + dz * dz > 96.0 * 96.0) continue;
             // A small animated 3D beacon: base, upper marker and a rotating purple halo.
-            mc.world.addParticleClient(ParticleTypes.END_ROD, x, y, z, 0.0, 0.025, 0.0);
-            mc.world.addParticleClient(ParticleTypes.END_ROD, x, y + 1.6, z, 0.0, 0.018, 0.0);
-            mc.world.addParticleClient(ParticleTypes.WITCH, x, y + 2.8, z, 0.0, 0.0, 0.0);
+            mc.world.addImportantParticleClient(ParticleTypes.END_ROD, x, y, z, 0.0, 0.025, 0.0);
+            mc.world.addImportantParticleClient(ParticleTypes.END_ROD, x, y + 1.6, z, 0.0, 0.018, 0.0);
+            mc.world.addImportantParticleClient(ParticleTypes.WITCH, x, y + 2.8, z, 0.0, 0.0, 0.0);
             if (worldFxTicks % 10 == 0) {
                 double angle = worldFxTicks * 0.16;
                 for (int i = 0; i < 3; i++) {
                     double a = angle + i * (Math.PI * 2.0 / 3.0);
-                    mc.world.addParticleClient(ParticleTypes.END_ROD,
+                    mc.world.addImportantParticleClient(ParticleTypes.END_ROD,
                             x + Math.cos(a) * 0.55, y + 0.1, z + Math.sin(a) * 0.55,
                             0.0, 0.01, 0.0);
                 }
@@ -183,11 +183,11 @@ public final class MistHud {
             double vx = (RANDOM.nextDouble() - 0.5) * 0.22;
             double vy = RANDOM.nextDouble() * 0.18 + 0.025;
             double vz = (RANDOM.nextDouble() - 0.5) * 0.22;
-            mc.world.addParticleClient(ParticleTypes.END_ROD, x, y, z, vx, vy, vz);
+            mc.world.addImportantParticleClient(ParticleTypes.END_ROD, x, y, z, vx, vy, vz);
         }
         for (int i = 0; i < 14; i++) {
             double angle = i * (Math.PI * 2.0 / 14.0);
-            mc.world.addParticleClient(ParticleTypes.WITCH, x + Math.cos(angle) * 0.55, y + 0.2,
+            mc.world.addImportantParticleClient(ParticleTypes.WITCH, x + Math.cos(angle) * 0.55, y + 0.2,
                     z + Math.sin(angle) * 0.55, 0.0, 0.035, 0.0);
         }
     }
