@@ -228,6 +228,9 @@ public final class MystScreen extends Screen {
             drawSmallButton(c, contentLeft + 200, sy + 142, 130, "СБРОСИТЬ");
             c.drawTextWithShadow(textRenderer, "Размер: " + pw + " × " + ph, contentLeft, sy + 184, MUTED);
             c.drawTextWithShadow(textRenderer, "Можно также тянуть за правый нижний угол.", contentLeft, sy + 205, MUTED);
+            c.drawTextWithShadow(textRenderer, "ОФОРМЛЕНИЕ HUD", contentLeft, sy + 230, WHITE);
+            drawSmallButton(c, contentLeft, sy + 248, 190, MystUiConfig.hudBackground ? "ФОН ПАНЕЛЕЙ: ВКЛ" : "ФОН ПАНЕЛЕЙ: ВЫКЛ");
+            drawSmallButton(c, contentLeft + 200, sy + 248, 190, "ПРОЗРАЧНОСТЬ: " + MystUiConfig.hudOpacity + "%");
         }
         c.disableScissor();
         int viewportHeight = contentBottom - contentTop;
@@ -294,6 +297,15 @@ public final class MystScreen extends Screen {
                 MystUiConfig.compact = !MystUiConfig.compact;
                 MystUiConfig.save();
                 clampScroll();
+                return true;
+            }
+            if (my >= sy + 248 && my <= sy + 273) {
+                if (mx >= contentLeft && mx <= contentLeft + 190) {
+                    MystUiConfig.hudBackground = !MystUiConfig.hudBackground;
+                } else if (mx >= contentLeft + 200 && mx <= contentLeft + 390) {
+                    MystUiConfig.hudOpacity = MystUiConfig.hudOpacity <= 55 ? 100 : MystUiConfig.hudOpacity - 15;
+                }
+                MystUiConfig.save();
                 return true;
             }
             if (my >= sy + 142 && my <= sy + 167) {
