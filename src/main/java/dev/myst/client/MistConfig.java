@@ -12,12 +12,12 @@ public final class MistConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path FILE = FabricLoader.getInstance().getConfigDir().resolve("mist-visuals.json");
     public static final Map<String, Boolean> modules = new LinkedHashMap<>();
-        boolean waypointSet;
-        double waypointX, waypointY, waypointZ;
     public static boolean waypointSet = false;
     public static double waypointX, waypointY, waypointZ;
     private static final class Data {
         Map<String, Boolean> modules = new LinkedHashMap<>();
+        boolean waypointSet;
+        double waypointX, waypointY, waypointZ;
     }
     public static boolean enabled(String id) { return modules.getOrDefault(id, defaultValue(id)); }
     public static void toggle(String id) { modules.put(id, !enabled(id)); save(); }
