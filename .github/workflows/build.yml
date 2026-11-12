@@ -24,10 +24,12 @@ jobs:
       - name: Verify JAR contents
         run: |
           test -f build/libs/Mist-Visuals-0.3.0.jar
-          jar tf build/libs/Mist-Visuals-0.2.0.jar | grep -q 'fabric.mod.json'
-          jar tf build/libs/Mist-Visuals-0.2.0.jar | grep -q 'assets/mystclient/icon.png'
+          jar tf build/libs/Mist-Visuals-0.3.0.jar | grep -q 'fabric.mod.json'
+          jar tf build/libs/Mist-Visuals-0.3.0.jar | grep -q 'assets/mystclient/icon.png'
+          jar tf build/libs/Mist-Visuals-0.3.0.jar | grep -q 'assets/mystclient/textures/gui/mist_background.png'
+          test $(stat -c%s build/libs/Mist-Visuals-0.3.0.jar) -ge 5242880
       - uses: actions/upload-artifact@v4
         with:
           name: Mist-Visuals-1.21.11
-          path: build/libs/Mist-Visuals-0.2.0.jar
+          path: build/libs/Mist-Visuals-0.3.0.jar
           if-no-files-found: error
