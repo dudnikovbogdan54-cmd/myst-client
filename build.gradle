@@ -72,3 +72,7 @@ tasks.register('generateMistTextures') {
 tasks.named('processResources') {
     dependsOn tasks.named('generateMistTextures')
 }
+
+tasks.named('sourcesJar') {
+    dependsOn tasks.named('generateMistTextures')
+}
