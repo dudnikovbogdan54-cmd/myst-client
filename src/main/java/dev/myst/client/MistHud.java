@@ -178,6 +178,7 @@ public final class MistHud {
         if (mc.player == null || mc.targetedEntity == null) {
             trackedTarget = null;
             previousHealth = -1.0F;
+            displayedTargetHealth = -1.0F;
             return;
         }
         if (!(mc.targetedEntity instanceof LivingEntity target)) return;
