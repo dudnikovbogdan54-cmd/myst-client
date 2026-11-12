@@ -37,3 +37,8 @@ The project is built by GitHub Actions using JDK 25 and targets Java 21 bytecode
 Block Overlay, Clear Weather FX, Hit Particles, Totem Pop FX, extra animations, Death Marker, CPS Counter, and full config profiles remain marked as upcoming in the menu. They are not presented as working features.
 
 No through-wall player ESP, x-ray, or server-side modifications are included.
+
+- Visual Lab: four crosshair styles with adjustable size, gap, thickness and color.
+- CPS HUD: left/right click counters with a compact display option.
+- Target HUD: optional target distance and smoothed health-bar animation.
+- HUD panels support saved background and opacity settings.
