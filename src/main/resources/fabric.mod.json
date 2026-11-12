@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "mystclient",
+  "version": "${version}",
+  "name": "MYST Client",
+  "description": "Client-side visual and streamer utilities.",
+  "environment": "client",
+  "entrypoints": { "client": ["dev.myst.client.MystClient"] },
+  "mixins": ["mystclient.mixins.json"],
+  "depends": { "fabricloader": ">=0.19.0", "minecraft": "~1.21.11", "java": ">=21", "fabric-api": "*" }
+}
