@@ -17,7 +17,7 @@ public final class MystScreen extends Screen {
         MARKS("Marks", "Метки и точки"),
         UTILITIES("Utilities", "Инструменты"),
         STREAMER("Streamer", "Режим приватности"),
-        CONFIGS("Configs", "Профили настроек");
+        CONFIGS("Settings", "Размер и оформление меню");
 
         final String label, subtitle;
         Page(String label, String subtitle) { this.label = label; this.subtitle = subtitle; }
@@ -33,22 +33,22 @@ public final class MystScreen extends Screen {
     private boolean resizing = false;
     private int dragStartX, dragStartY, startWidth, startHeight;
 
-    private static final int MIN_W = 620, MIN_H = 390;
+    private static final int MIN_W = 520, MIN_H = 330;
     private static final int MAX_W = 1160, MAX_H = 760;
     private static final int PANEL = 0xF0110D1B, SIDEBAR = 0xF00D0A15;
     private static final int CARD = 0xF01D1728, CARD_HOVER = 0xFF292039;
-    private static final int PURPLE = 0xFFB58AFF, ACCENT = 0xFF8152C5;
+    private int accent() { return MystUiConfig.accent(); }\n    private int accentDark() { return 0xFF8152C5; }
     private static final int WHITE = 0xFFF4F0FA, MUTED = 0xFF9D91AD;
 
     public MystScreen() { super(Text.literal("Myst Visuals")); }
 
     @Override
     protected void init() {
-        pw = Math.max(Math.min(MIN_W, width - 16), Math.min(pw == 0 ? 980 : pw, Math.min(MAX_W, width - 16)));
-        ph = Math.max(Math.min(MIN_H, height - 16), Math.min(ph == 0 ? 480 : ph, Math.min(MAX_H, height - 16)));
+        pw = Math.max(Math.min(MIN_W, width - 16), Math.min(pw == 0 ? MystUiConfig.width : pw, Math.min(MAX_W, width - 16)));
+        ph = Math.max(Math.min(MIN_H, height - 16), Math.min(ph == 0 ? MystUiConfig.height : ph, Math.min(MAX_H, height - 16)));
         px = (width - pw) / 2;
         py = (height - ph) / 2;
-        sw = Math.max(138, Math.min(178, pw / 5));
+        sw = Math.max(126, Math.min(150, pw / 5));
         clearChildren();
         original = null;
         alias = null;
@@ -149,21 +149,21 @@ public final class MystScreen extends Screen {
         c.fill(px + sw - 1, py, px + sw, py + ph, 0xFF352844);
         c.fill(px + sw, py + 66, px + pw, py + 67, 0xFF352844);
 
-        c.fill(px + 18, py + 17, px + 52, py + 51, ACCENT);
+        c.fill(px + 18, py + 17, px + 52, py + 51, accentDark());
         c.drawCenteredTextWithShadow(textRenderer, "M", px + 35, py + 28, WHITE);
         c.drawTextWithShadow(textRenderer, "MYST", px + 62, py + 19, WHITE);
-        c.drawTextWithShadow(textRenderer, "VISUALS", px + 62, py + 34, PURPLE);
+        c.drawTextWithShadow(textRenderer, "VISUALS", px + 62, py + 34, accent());
         c.drawTextWithShadow(textRenderer, "CLIENT MENU", px + 18, py + 75, MUTED);
 
-        int navY = py + 100;
+        int navY = py + 88;
         for (Page p : Page.values()) {
-            int y = navY + p.ordinal() * 39;
+            int y = navY + p.ordinal() * 33;
             boolean active = p == page;
             if (active) {
-                c.fill(px + 9, y - 4, px + sw - 9, y + 27, 0xFF332445);
+                c.fill(px + 9, y - 4, px + sw - 9, y + 25, 0xFF332445);
                 c.fill(px + 9, y - 4, px + 12, y + 27, PURPLE);
             }
-            c.drawTextWithShadow(textRenderer, p.label, px + 21, y + 6, active ? WHITE : MUTED);
+            c.drawTextWithShadow(textRenderer, p.label, px + 21, y + 5, active ? WHITE : MUTED);
         }
 
         int headX = px + sw + 24;
@@ -174,8 +174,8 @@ public final class MystScreen extends Screen {
         drawSmallButton(c, px + pw - 43, py + 17, 26, "×");
         c.drawTextWithShadow(textRenderer, pw + " × " + ph, px + pw - 112, py + 48, MUTED);
 
-        int contentTop = py + 82;
-        int contentBottom = py + ph - 38;
+        int contentTop = py + 74;
+        int contentBottom = py + ph - 34;
         int contentLeft = px + sw + 24;
         int contentRight = px + pw - 20;
         c.enableScissor(contentLeft, contentTop, contentRight, contentBottom);
@@ -188,20 +188,20 @@ public final class MystScreen extends Screen {
             int col = i % 2;
             row = i / 2;
             int x = contentLeft + col * (cw + gap);
-            int y = contentTop + 4 + row * 94 - scrollOffset;
+            int y = contentTop + 4 + row * rowStep - scrollOffset;
             boolean hovered = mx >= x && mx <= x + cw && my >= y && my <= y + 80;
-            c.fill(x, y, x + cw, y + 80, hovered ? CARD_HOVER : CARD);
-            c.fill(x, y, x + 3, y + 80, card.implemented ? ACCENT : 0xFF51465D);
-            c.drawTextWithShadow(textRenderer, card.title, x + 13, y + 13, WHITE);
-            c.drawTextWithShadow(textRenderer, card.description, x + 13, y + 34, MUTED);
+            c.fill(x, y, x + cw, y + cardHeight, hovered ? CARD_HOVER : CARD);
+            c.fill(x, y, x + 3, y + cardHeight, card.implemented ? accentDark() : 0xFF51465D);
+            c.drawTextWithShadow(textRenderer, card.title, x + 13, y + 10, WHITE);
+            c.drawTextWithShadow(textRenderer, card.description, x + 13, y + 27, MUTED);
             if (card.implemented) {
                 boolean enabled = isEnabled(card.id);
                 int sx = x + cw - 54;
-                c.fill(sx, y + 54, sx + 40, y + 72, enabled ? 0xFF7145A7 : 0xFF403849);
-                c.fill(enabled ? sx + 22 : sx + 2, y + 56, enabled ? sx + 38 : sx + 18, y + 70, WHITE);
-                c.drawTextWithShadow(textRenderer, enabled ? "ON" : "OFF", sx - 27, y + 58, enabled ? PURPLE : MUTED);
+                c.fill(sx, y + cardHeight - 22, sx + 40, y + cardHeight - 5, enabled ? 0xFF7145A7 : 0xFF403849);
+                c.fill(enabled ? sx + 22 : sx + 2, y + cardHeight - 20, enabled ? sx + 38 : sx + 18, y + cardHeight - 7, WHITE);
+                c.drawTextWithShadow(textRenderer, enabled ? "ON" : "OFF", sx - 27, y + cardHeight - 18, enabled ? accent() : MUTED);
             } else {
-                c.drawTextWithShadow(textRenderer, "SOON", x + cw - 45, y + 59, MUTED);
+                c.drawTextWithShadow(textRenderer, "SOON", x + cw - 45, y + cardHeight - 18, MUTED);
             }
         }
         if (page == Page.STREAMER) {
@@ -223,7 +223,7 @@ public final class MystScreen extends Screen {
 
         c.drawTextWithShadow(textRenderer, "КОЛЁСИКО — ПРОКРУТКА", px + 18, py + ph - 20, 0xFF756A82);
         c.drawTextWithShadow(textRenderer, "MYST VISUALS  •  1.21.11", contentLeft, py + ph - 20, 0xFF756A82);
-        c.fill(px + pw - 16, py + ph - 16, px + pw - 5, py + ph - 5, PURPLE);
+        c.fill(px + pw - 16, py + ph - 16, px + pw - 5, py + ph - 5, accent());
         super.render(c, mx, my, delta);
     }
 
@@ -263,25 +263,25 @@ public final class MystScreen extends Screen {
             if (mx >= px + pw - 46) { close(); return true; }
         }
         if (click.button() == 0) {
-            int navY = py + 100;
+            int navY = py + 88;
             for (Page p : Page.values()) {
-                int y = navY + p.ordinal() * 39;
+                int y = navY + p.ordinal() * 33;
                 if (mx >= px + 8 && mx <= px + sw - 8 && my >= y - 5 && my <= y + 28) {
                     select(p);
                     return true;
                 }
             }
-            int contentTop = py + 82, contentBottom = py + ph - 38;
+            int contentTop = py + 74, contentBottom = py + ph - 34;
             int contentLeft = px + sw + 24, contentRight = px + pw - 20;
             if (mx >= contentLeft && mx <= contentRight && my >= contentTop && my <= contentBottom) {
                 List<ModuleCard> list = cards();
-                int gap = 12, cw = Math.max(150, (contentRight - contentLeft - gap) / 2);
+                int gap = 10, cw = Math.max(140, (contentRight - contentLeft - gap) / 2);\n                int cardHeight = MystUiConfig.compact ? 64 : 78;\n                int rowStep = cardHeight + 12;
                 for (int i = 0; i < list.size(); i++) {
                     ModuleCard card = list.get(i);
                     int col = i % 2, row = i / 2;
                     int x = contentLeft + col * (cw + gap);
-                    int y = contentTop + 4 + row * 94 - scrollOffset;
-                    if (mx >= x && mx <= x + cw && my >= y && my <= y + 80 && card.implemented) {
+                    int y = contentTop + 4 + row * rowStep - scrollOffset;
+                    if (mx >= x && mx <= x + cw && my >= y && my <= y + cardHeight && card.implemented) {
                         if (card.id.equals("waypoints") && click.button() == 1) {
                             client.setScreen(new WaypointScreen(this));
                         } else {
