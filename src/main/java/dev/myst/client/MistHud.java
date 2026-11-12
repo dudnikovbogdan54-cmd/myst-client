@@ -25,7 +25,7 @@ public final class MistHud {
         int y = 8;
         if (MistConfig.enabled("watermark")) {
             panel(ctx, 8, y, 116, 20);
-            ctx.drawTextWithShadow(mc.textRenderer, "MV  Mist Visuals", 14, y + 6, PURPLE);
+            ctx.drawTextWithShadow(mc.textRenderer, "MV  Myst Visuals", 14, y + 6, PURPLE);
             y += 25;
         }
         if (MistConfig.enabled("fps")) {
@@ -151,7 +151,11 @@ public final class MistHud {
     }
 
     private static void panel(DrawContext ctx, int x, int y, int w, int h) {
-        ctx.fill(x, y, x + w, y + h, PANEL);
-        ctx.fill(x, y, x + 2, y + h, PURPLE);
+        if (MystUiConfig.hudBackground) {
+            int alpha = Math.max(35, Math.min(255, Math.round(255.0f * MystUiConfig.hudOpacity / 100.0f)));
+            int background = (alpha << 24) | 0x001A1425;
+            ctx.fill(x, y, x + w, y + h, background);
+        }
+        ctx.fill(x, y, x + 2, y + h, MystUiConfig.accent());
     }
 }
