@@ -1,4 +1,4 @@
-name: Build MYST Client
+name: Build Mist Visuals
 on:
   push:
     branches: [ main ]
@@ -19,11 +19,11 @@ jobs:
         run: gradle build
       - name: Verify JAR contents
         run: |
-          test -f build/libs/MYST-Client-0.1.0.jar
-          jar tf build/libs/MYST-Client-0.1.0.jar | grep -q 'fabric.mod.json'
-          jar tf build/libs/MYST-Client-0.1.0.jar | grep -q 'assets/mystclient/icon.png'
+          test -f build/libs/Mist-Visuals-0.2.0.jar
+          jar tf build/libs/Mist-Visuals-0.2.0.jar | grep -q 'fabric.mod.json'
+          jar tf build/libs/Mist-Visuals-0.2.0.jar | grep -q 'assets/mystclient/icon.png'
       - uses: actions/upload-artifact@v4
         with:
-          name: MYST-Client-1.21.11
-          path: build/libs/MYST-Client-0.1.0.jar
+          name: Mist-Visuals-1.21.11
+          path: build/libs/Mist-Visuals-0.2.0.jar
           if-no-files-found: error
