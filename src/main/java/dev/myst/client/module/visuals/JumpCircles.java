@@ -18,7 +18,8 @@ import java.util.List;
 public final class JumpCircles {
     private record Pulse(Vec3d position, int age) {}
     private static final List<Pulse> PULSES = new ArrayList<>();
-    private static boolean initialized;
+    private static boolean initialized; private static boolean enabled;
+    public static void setEnabled(boolean value) { enabled = value; }
     private static boolean wasGrounded;
 
     private JumpCircles() {}
@@ -48,6 +49,7 @@ public final class JumpCircles {
     }
 
     private static void render(WorldRenderContext context) {
+        if (!enabled) return;
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.world == null || PULSES.isEmpty()) return;
         Vec3d camera = client.gameRenderer.getCamera().getPos();

@@ -1,53 +1,20 @@
+
 package dev.myst.client;
-
+import dev.myst.client.module.ModuleManager;
+import dev.myst.client.module.marks.Waypoints;
+import dev.myst.client.module.visuals.*;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
+import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
-
 public final class MystClient implements ClientModInitializer {
-    public static final String MOD_ID = "mystclient";
-    private static KeyBinding openMenu;
-    private static KeyBinding zoomKey;
-    private static KeyBinding waypointKey;
-    private static Integer previousFov;
-    private static boolean zooming;
-
-    @Override
-    public void onInitializeClient() {
-        StreamerConfig.load();
-        MystUiConfig.load();
-        MystVisualConfig.load();
-        MystConfig.load();
-        MystHud.register();
-        openMenu = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.mystclient.menu", InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_RIGHT_SHIFT, KeyBinding.Category.MISC));
-        zoomKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.mystclient.zoom", InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_C, KeyBinding.Category.MISC));
-        waypointKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.mystclient.waypoint", InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_B, KeyBinding.Category.MISC));
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            MystHud.tick();
-            if (waypointKey.wasPressed() && client.player != null) {
-                MystConfig.setWaypoint(client.player.getX(), client.player.getY(), client.player.getZ());
-            }
-            if (MystConfig.enabled("zoom") && zoomKey.isPressed()) {
-                if (!zooming) {
-                    previousFov = client.options.getFov().getValue();
-                    zooming = true;
-                }
-                client.options.getFov().setValue(Math.max(20, Math.min(35, previousFov == null ? 70 : previousFov / 2)));
-            } else if (zooming) {
-                if (previousFov != null) client.options.getFov().setValue(previousFov);
-                previousFov = null;
-                zooming = false;
-            }
-            while (openMenu.wasPressed()) client.setScreen(new MystScreen());
-        });
-    }
+ public static final String MOD_ID="mystclient"; private boolean kDown,shiftDown;
+ @Override public void onInitializeClient(){
+  StreamerConfig.load(); ModuleManager.initialize(); ConfigManager.initialize();
+  Waypoints.initialize(); JumpCircles.initialize(); Trails.initialize(); ChinaHat.initialize(); HudManager.initialize();
+  ClientCommandRegistrationCallback.EVENT.register((dispatcher,registry)->dispatcher.register(ClientCommandManager.literal("mystgui").executes(ctx->{net.minecraft.client.MinecraftClient.getInstance().execute(()->net.minecraft.client.MinecraftClient.getInstance().setScreen(new ClickGuiScreen()));return 1;})));
+  ClientTickEvents.END_CLIENT_TICK.register(client->{if(client.player==null)return;long w=client.getWindow().getHandle();boolean k=GLFW.glfwGetKey(w,GLFW.GLFW_KEY_K)==GLFW.GLFW_PRESS;boolean r=GLFW.glfwGetKey(w,GLFW.GLFW_KEY_RIGHT_SHIFT)==GLFW.GLFW_PRESS;if((k&&!kDown)||(r&&!shiftDown)){if(client.currentScreen instanceof ClickGuiScreen)client.setScreen(null);else client.setScreen(new ClickGuiScreen());}kDown=k;shiftDown=r;});
+ }
 }

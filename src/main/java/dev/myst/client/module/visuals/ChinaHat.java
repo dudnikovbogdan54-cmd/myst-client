@@ -11,7 +11,8 @@ import net.minecraft.util.math.Vec3d;
 
 /** Floating neon halo and wireframe cone above the local player in third person. */
 public final class ChinaHat {
-    private static boolean initialized;
+    private static boolean initialized; private static boolean enabled;
+    public static void setEnabled(boolean value) { enabled = value; }
     private static long ticks;
     private ChinaHat() {}
 
@@ -22,6 +23,7 @@ public final class ChinaHat {
     }
 
     private static void render(WorldRenderContext context) {
+        if (!enabled) return;
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.world == null
                 || client.options.getPerspective().isFirstPerson()) return;

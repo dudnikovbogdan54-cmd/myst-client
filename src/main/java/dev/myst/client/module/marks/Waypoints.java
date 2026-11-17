@@ -33,7 +33,8 @@ public final class Waypoints {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path FILE = FabricLoader.getInstance().getConfigDir().resolve("mystclient_waypoints.json");
     private static final List<Waypoint> POINTS = new ArrayList<>();
-    private static boolean initialized;
+    private static boolean initialized; private static boolean enabled = true;
+    public static void setEnabled(boolean value) { enabled = value; }
     private static long animationClock;
 
     private Waypoints() {}
@@ -133,10 +134,11 @@ public final class Waypoints {
     }
 
     private static void renderWorld(WorldRenderContext context) {
+        if (!enabled) return;
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.world == null || client.player == null || client.options.hudHidden) return;
         String dimension = client.world.getRegistryKey().getValue().toString();
-        Vec3d camera = client.gameRenderer.getCamera().getPos();
+        Vec3d camera = client.gameRenderer.getCamera().getCameraPos();
         VertexConsumer lines = context.consumers().getBuffer(RenderLayers.lines());
         VertexConsumer quads = context.consumers().getBuffer(RenderLayers.debugQuads());
         animationClock++;
@@ -185,11 +187,12 @@ public final class Waypoints {
 
     private static void renderLabels(net.minecraft.client.gui.DrawContext context,
                                      net.minecraft.client.render.RenderTickCounter tickCounter) {
+        if (!enabled) return;
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.world == null || client.options.hudHidden) return;
         String dimension = client.world.getRegistryKey().getValue().toString();
         Camera camera = client.gameRenderer.getCamera();
-        Vec3d cameraPos = camera.getPos();
+        Vec3d cameraPos = camera.getCameraPos();
         int width = context.getScaledWindowWidth(), height = context.getScaledWindowHeight();
         double fov = Math.toRadians(client.options.getFov().getValue());
         double focal = (height * 0.5) / Math.tan(fov * 0.5);
@@ -221,16 +224,12 @@ public final class Waypoints {
             int x = Math.max(3, Math.min(width - panelWidth - 3, (int)Math.round(sx - panelWidth * 0.5)));
             int y = Math.max(3, Math.min(height - panelHeight - 3, (int)Math.round(sy - panelHeight - 8)));
 
-            var matrices = context.getMatrices();
-            var consumers = context.getVertexConsumers();
-            VertexConsumer fan = consumers.getBuffer(RenderLayers.debugTriangleFan());
-            Render2D.drawShadow(fan, matrices.peek(), x, y, panelWidth, panelHeight, 7,
-                    MathUtil.withAlpha(0xE8100E18, alpha), 4, 3.0f);
-            Render2D.drawRoundedRect(fan, matrices.peek(), x, y, panelWidth, panelHeight, 7,
+            Render2D.drawShadow(context, x, y, panelWidth, panelHeight, 7,
+                    MathUtil.withAlpha(0xE8100E18, alpha), 4, 3);
+            Render2D.drawRoundedRect(context, x, y, panelWidth, panelHeight, 7,
                     MathUtil.withAlpha(0xE91A1724, alpha));
-            Render2D.drawRoundedRect(fan, matrices.peek(), x + 7, y + 7, 6, 8, 3,
+            Render2D.drawRoundedRect(context, x + 7, y + 7, 6, 8, 3,
                     MathUtil.withAlpha(point.color, alpha));
-            consumers.draw(RenderLayers.debugTriangleFan());
             context.drawText(client.textRenderer, name, x + 19, y + 7,
                     MathUtil.withAlpha(0xFFF5F1FF, alpha), false);
             context.drawText(client.textRenderer, meters, x + panelWidth - metersWidth - 8, y + 7,

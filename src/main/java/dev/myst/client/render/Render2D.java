@@ -1,5 +1,6 @@
 package dev.myst.client.render;
 import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
 /** Buffer-based GUI primitives; no DrawContext.fill and no immediate-mode GL. */
 public final class Render2D {
@@ -24,4 +25,15 @@ public final class Render2D {
   for(int i=0;i<8;i++){double a=Math.toRadians(start+i*11.25),z=Math.toRadians(start+(i+1)*11.25);float ix=x+(float)Math.cos(a)*(r-t),iy=y+(float)Math.sin(a)*(r-t),ox=x+(float)Math.cos(a)*r,oy=y+(float)Math.sin(a)*r,ix2=x+(float)Math.cos(z)*(r-t),iy2=y+(float)Math.sin(z)*(r-t),ox2=x+(float)Math.cos(z)*r,oy2=y+(float)Math.sin(z)*r;v(b,m,ix,iy,c);v(b,m,ox,oy,c);v(b,m,ox2,oy2,c);v(b,m,ix2,iy2,c);}
  }
  public static void drawCircle(VertexConsumer b,MatrixStack.Entry m,float x,float y,float r,int c){if(r<=0)return;for(int i=0;i<48;i++){double a=Math.PI*2*i/48,z=Math.PI*2*(i+1)/48;v(b,m,x,y,c);v(b,m,x+(float)Math.cos(a)*r,y+(float)Math.sin(a)*r,c);v(b,m,x+(float)Math.cos(z)*r,y+(float)Math.sin(z)*r,c);}}
+ public static void drawRoundedRect(DrawContext c,int x,int y,int w,int h,int radius,int color){
+  if(w<=0||h<=0)return;int r=Math.max(0,Math.min(radius,Math.min(w,h)/2));if(r==0){c.fill(x,y,x+w,y+h,color);return;}
+  for(int row=0;row<h;row++){double dy=row<r?r-row-.5:row>=h-r?row-(h-r)+.5:0;int inset=dy==0?0:r-(int)Math.floor(Math.sqrt(Math.max(0,r*r-dy*dy)));c.fill(x+inset,y+row,x+w-inset,y+row+1,color);}
+ }
+ public static void drawShadow(DrawContext c,int x,int y,int w,int h,int radius,int color,int layers,int spread){
+  int n=Math.max(1,layers);for(int i=n;i>0;i--){int d=spread*i/n;drawRoundedRect(c,x-d,y-d,w+2*d,h+2*d,radius+d,MathUtil.multiplyAlpha(color,(float)(n-i+1)/(n*(n+1)*.5f)));}
+ }
+ public static void drawRoundedOutline(DrawContext c,int x,int y,int w,int h,int radius,int thickness,int color){
+  int t=Math.max(1,thickness);drawRoundedRect(c,x,y,w,h,radius,color);drawRoundedRect(c,x+t,y+t,w-2*t,h-2*t,Math.max(0,radius-t),0xFF111217);
+ }
+
 }

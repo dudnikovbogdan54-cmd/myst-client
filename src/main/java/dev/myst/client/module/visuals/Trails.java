@@ -19,7 +19,8 @@ import java.util.List;
 public final class Trails {
     private static final Deque<Vec3d> HISTORY = new ArrayDeque<>();
     private static final int MAX_POINTS = 26;
-    private static boolean initialized;
+    private static boolean initialized; private static boolean enabled;
+    public static void setEnabled(boolean value) { enabled = value; if (!value) HISTORY.clear(); }
 
     private Trails() {}
 
@@ -46,6 +47,7 @@ public final class Trails {
     }
 
     private static void render(WorldRenderContext context) {
+        if (!enabled) return;
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.world == null || HISTORY.size() < 2
                 || client.options.getPerspective().isFirstPerson()) return;
