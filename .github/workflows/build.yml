@@ -56,11 +56,14 @@ jobs:
           test -n "$JAR"
           test -f "$JAR"
           jar tf "$JAR" | grep -q 'fabric.mod.json'
-          jar tf "$JAR" | grep -q 'dev/myst/client/WaypointScreen.class'
-          jar tf "$JAR" | grep -q 'dev/myst/client/MystHud.class'
-          jar tf "$JAR" | grep -q 'dev/myst/client/MystConfig.class'
+          jar tf "$JAR" | grep -q 'dev/myst/client/ClickGuiScreen.class'
+          jar tf "$JAR" | grep -q 'dev/myst/client/HudManager.class'
+          jar tf "$JAR" | grep -q 'dev/myst/client/HudEditorScreen.class'
+          jar tf "$JAR" | grep -q 'dev/myst/client/ConfigManager.class'
+          jar tf "$JAR" | grep -q 'dev/myst/client/module/ModuleManager.class'
+          jar tf "$JAR" | grep -q 'dev/myst/client/module/marks/Waypoints.class'
+          jar tf "$JAR" | grep -q 'dev/myst/client/CustomCrosshair.class'
           jar tf "$JAR" | grep -q 'assets/mystclient/icon.png'
-          jar tf "$JAR" | grep -q 'assets/mystclient/textures/gui/myst_background.png'
           unzip -t "$JAR"
           echo "Verified: $JAR"
           echo "JAR size: $(du -h "$JAR" | cut -f1)"
