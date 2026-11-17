@@ -5,7 +5,8 @@
   "client": [
     "PlayerListEntryMixin",
     "LightmapTextureManagerMixin",
-    "InGameHudMixin"
+    "InGameHudMixin",
+    "ScreenAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

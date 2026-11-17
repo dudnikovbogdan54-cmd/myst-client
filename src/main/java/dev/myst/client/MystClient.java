@@ -1,5 +1,6 @@
 package dev.myst.client;
 
+import dev.myst.client.mixin.ScreenAccessor;
 import dev.myst.client.module.ModuleManager;
 import dev.myst.client.module.marks.Waypoints;
 import dev.myst.client.module.visuals.*;
@@ -33,30 +34,27 @@ public final class MystClient implements ClientModInitializer {
         ChinaHat.initialize();
         HudManager.initialize();
 
-        // Touch-friendly entry point for MojoLauncher.
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
             if (screen instanceof GameMenuScreen) {
                 int buttonWidth = 100;
                 int buttonHeight = 20;
                 int buttonX = Math.max(4, scaledWidth - buttonWidth - 8);
-                screen.addDrawableChild(
-                    ButtonWidget.builder(
-                        Text.literal("Myst Visuals"),
-                        button -> client.setScreen(new ClickGuiScreen())
-                    ).dimensions(buttonX, 8, buttonWidth, buttonHeight).build()
-                );
+
+                ButtonWidget button = ButtonWidget.builder(
+                    Text.literal("Myst Visuals"),
+                    widget -> client.setScreen(new ClickGuiScreen())
+                ).dimensions(buttonX, 8, buttonWidth, buttonHeight).build();
+
+                ((ScreenAccessor) screen).myst$addDrawableChild(button);
             }
         });
 
-        // Opening from chat is deferred so ChatScreen cannot replace the GUI
-        // while finishing its close sequence at the end of the current tick.
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
-            dispatcher.register(
-                ClientCommandManager.literal("mystgui").executes(context -> {
-                    guiOpenTicks = 2;
-                    return 1;
-                })
-            )
+            dispatcher.register(ClientCommandManager.literal("mystgui").executes(context -> {
+                // Wait past the chat screen's close tick before replacing it.
+                guiOpenTicks = 2;
+                return 1;
+            }))
         );
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
