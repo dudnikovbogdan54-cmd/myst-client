@@ -1,6 +1,6 @@
 
 package dev.myst.client;
-import com.google.gson.*;import dev.myst.client.module.*;import dev.myst.client.module.Module.*;import net.fabricmc.loader.api.FabricLoader;import java.nio.file.*;import java.util.*;
+import com.google.gson.*;import dev.myst.client.module.*;import dev.myst.client.module.Module;import dev.myst.client.module.Module.*;import net.fabricmc.loader.api.FabricLoader;import java.nio.file.*;import java.util.*;
 public final class ConfigManager{
  private static final Gson G=new GsonBuilder().setPrettyPrinting().create();private static final Path FILE=FabricLoader.getInstance().getConfigDir().resolve("mystclient.json");public static final Map<String,int[]> HUD=new LinkedHashMap<>();
  private static final class Data{Map<String,Mod> modules=new LinkedHashMap<>();Map<String,int[]> hud=new LinkedHashMap<>();}private static final class Mod{boolean enabled;int key;Map<String,JsonElement> settings=new LinkedHashMap<>();}

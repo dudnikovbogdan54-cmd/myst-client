@@ -52,7 +52,7 @@ public final class JumpCircles {
         if (!enabled) return;
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.world == null || PULSES.isEmpty()) return;
-        Vec3d camera = client.gameRenderer.getCamera().getPos();
+        Vec3d camera = client.gameRenderer.getCamera().getCameraPos();
         VertexConsumer lines = context.consumers().getBuffer(RenderLayers.lines());
         for (Pulse pulse : PULSES) {
             float t = pulse.age() / 28.0f;

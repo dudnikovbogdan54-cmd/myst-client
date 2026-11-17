@@ -52,7 +52,7 @@ public final class Trails {
         if (client.player == null || client.world == null || HISTORY.size() < 2
                 || client.options.getPerspective().isFirstPerson()) return;
         List<Vec3d> points = new ArrayList<>(HISTORY);
-        Vec3d camera = client.gameRenderer.getCamera().getPos();
+        Vec3d camera = client.gameRenderer.getCamera().getCameraPos();
         VertexConsumer quads = context.consumers().getBuffer(RenderLayers.debugQuads());
         for (int i = 0; i < points.size() - 1; i++) {
             Vec3d a = points.get(i);

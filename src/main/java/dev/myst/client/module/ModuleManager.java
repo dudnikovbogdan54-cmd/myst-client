@@ -4,6 +4,7 @@ import dev.myst.client.CustomCrosshair;import dev.myst.client.module.Module.*;im
 public final class ModuleManager{
  private static final List<Module> MODULES=new ArrayList<>();private static final Set<Integer> DOWN=new HashSet<>();private static boolean initialized;private ModuleManager(){}
  public static void initialize(){if(initialized)return;initialized=true;
+  add("Fullbright","Повышенная яркость мира",Category.VISUALS,false,0,null);
   add("Custom Crosshair","Прицел с настройкой цвета",Category.VISUALS,true,0,CustomCrosshair::setEnabled);
   add("Jump Circles","Неоновые кольца при прыжке",Category.VISUALS,false,0,JumpCircles::setEnabled);
   add("Trails","Плавный след игрока",Category.VISUALS,false,0,Trails::setEnabled);

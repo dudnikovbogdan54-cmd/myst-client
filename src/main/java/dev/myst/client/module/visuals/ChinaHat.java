@@ -28,7 +28,7 @@ public final class ChinaHat {
         if (client.player == null || client.world == null
                 || client.options.getPerspective().isFirstPerson()) return;
         ticks++;
-        Vec3d camera = client.gameRenderer.getCamera().getPos();
+        Vec3d camera = client.gameRenderer.getCamera().getCameraPos();
         Vec3d head = new Vec3d(client.player.getX(),
                 client.player.getY() + client.player.getHeight() + 0.22, client.player.getZ()).subtract(camera);
         VertexConsumer lines = context.consumers().getBuffer(RenderLayers.lines());
