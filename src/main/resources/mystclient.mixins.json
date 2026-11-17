@@ -2,6 +2,12 @@
   "required": true,
   "package": "dev.myst.client.mixin",
   "compatibilityLevel": "JAVA_21",
-  "client": ["PlayerListEntryMixin", "LightmapTextureManagerMixin"],
-  "injectors": { "defaultRequire": 1 }
+  "client": [
+    "PlayerListEntryMixin",
+    "LightmapTextureManagerMixin",
+    "InGameHudMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }
