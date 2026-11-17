@@ -11,16 +11,20 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
-import java.util.List;
+import java.util.Iterator;
 
 /** Smooth, fading player ribbon. It is intentionally hidden in first person. */
 public final class Trails {
     private static final Deque<Vec3d> HISTORY = new ArrayDeque<>();
     private static final int MAX_POINTS = 26;
-    private static boolean initialized; private static boolean enabled;
-    public static void setEnabled(boolean value) { enabled = value; if (!value) HISTORY.clear(); }
+    private static boolean initialized;
+    private static boolean enabled;
+
+    public static void setEnabled(boolean value) {
+        enabled = value;
+        if (!value) HISTORY.clear();
+    }
 
     private Trails() {}
 
@@ -51,23 +55,46 @@ public final class Trails {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.world == null || HISTORY.size() < 2
                 || client.options.getPerspective().isFirstPerson()) return;
-        List<Vec3d> points = new ArrayList<>(HISTORY);
+
         Vec3d camera = client.gameRenderer.getCamera().getCameraPos();
         VertexConsumer quads = context.consumers().getBuffer(RenderLayers.debugQuads());
-        for (int i = 0; i < points.size() - 1; i++) {
-            Vec3d a = points.get(i);
-            Vec3d b = points.get(i + 1);
-            Vec3d direction = b.subtract(a);
-            Vec3d side = new Vec3d(-direction.z, 0, direction.x);
-            if (side.lengthSquared() < 1.0E-6) continue;
-            side = side.normalize().multiply(0.075);
-            float t0 = i / (float)(points.size() - 1);
-            float t1 = (i + 1) / (float)(points.size() - 1);
-            int c0 = MathUtil.multiplyAlpha(MathUtil.gradient(t0, 0xFFB58AFF, 0xFF55E6FF), 0.08f + t0 * 0.62f);
-            int c1 = MathUtil.multiplyAlpha(MathUtil.gradient(t1, 0xFFB58AFF, 0xFF55E6FF), 0.08f + t1 * 0.62f);
-            Render3D.drawRibbon(quads, context.matrices().peek(),
-                    a.add(side).subtract(camera), a.subtract(side).subtract(camera),
-                    b.add(side).subtract(camera), b.subtract(side).subtract(camera), c0, c1);
+        var matrix = context.matrices().peek();
+        Iterator<Vec3d> iterator = HISTORY.iterator();
+        Vec3d previous = iterator.next();
+        int index = 0;
+        int segmentCount = HISTORY.size() - 1;
+
+        while (iterator.hasNext()) {
+            Vec3d current = iterator.next();
+            double dx = current.x - previous.x;
+            double dz = current.z - previous.z;
+            double sideLengthSq = dx * dx + dz * dz;
+            if (sideLengthSq >= 1.0E-6) {
+                double scale = 0.075 / Math.sqrt(sideLengthSq);
+                float sx = (float)(-dz * scale);
+                float sz = (float)(dx * scale);
+                float t0 = index / (float)segmentCount;
+                float t1 = (index + 1) / (float)segmentCount;
+                int c0 = MathUtil.multiplyAlpha(
+                        MathUtil.gradient(t0, 0xFFB58AFF, 0xFF55E6FF), 0.08f + t0 * 0.62f);
+                int c1 = MathUtil.multiplyAlpha(
+                        MathUtil.gradient(t1, 0xFFB58AFF, 0xFF55E6FF), 0.08f + t1 * 0.62f);
+
+                float ax = (float)(previous.x + sx - camera.x);
+                float ay = (float)(previous.y - camera.y);
+                float az = (float)(previous.z + sz - camera.z);
+                float bx = (float)(previous.x - sx - camera.x);
+                float bz = (float)(previous.z - sz - camera.z);
+                float cx = (float)(current.x - sx - camera.x);
+                float cy = (float)(current.y - camera.y);
+                float cz = (float)(current.z - sz - camera.z);
+                float ex = (float)(current.x + sx - camera.x);
+                float ez = (float)(current.z + sz - camera.z);
+                Render3D.drawRibbon(quads, matrix, ax, ay, az, bx, ay, bz,
+                        cx, cy, cz, ex, cy, ez, c0, c1);
+            }
+            previous = current;
+            index++;
         }
     }
 }
