@@ -56,7 +56,11 @@ public final class Trails {
         if (client.player == null || client.world == null || HISTORY.size() < 2
                 || client.options.getPerspective().isFirstPerson()) return;
 
-        Vec3d camera = client.gameRenderer.getCamera().getCameraPos();
+        var cameraView = client.gameRenderer.getCamera();
+        Vec3d camera = cameraView.getCameraPos();
+        Vec3d newest = HISTORY.peekLast();
+        if (newest == null || !Render3D.isVisible((float)newest.x, (float)newest.y, (float)newest.z,
+                camera.x, camera.y, camera.z, cameraView.getYaw(), cameraView.getPitch(), 48.0)) return;
         VertexConsumer quads = context.consumers().getBuffer(RenderLayers.debugQuads());
         var matrix = context.matrices().peek();
         Iterator<Vec3d> iterator = HISTORY.iterator();
