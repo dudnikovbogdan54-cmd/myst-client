@@ -137,51 +137,65 @@ public final class Waypoints {
         if (!enabled) return;
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.world == null || client.player == null || client.options.hudHidden) return;
+
         String dimension = client.world.getRegistryKey().getValue().toString();
-        Vec3d camera = client.gameRenderer.getCamera().getCameraPos();
-        VertexConsumer lines = context.consumers().getBuffer(RenderLayers.lines());
+        Camera camera = client.gameRenderer.getCamera();
+        Vec3d cameraPos = camera.getCameraPos();
+        double cx = cameraPos.x, cy = cameraPos.y, cz = cameraPos.z;
         VertexConsumer quads = context.consumers().getBuffer(RenderLayers.debugQuads());
+        var matrix = context.matrices().peek();
         animationClock++;
         float rotation = (animationClock % 3600L) * 0.035f;
 
         for (Waypoint point : POINTS) {
             if (!point.enabled || !safe(point.dimension).equals(dimension)) continue;
-            Vec3d base = new Vec3d(point.x + 0.5, point.y, point.z + 0.5);
-            if (base.squaredDistanceTo(camera) > 160.0 * 160.0) continue;
-            Vec3d p = base.subtract(camera);
+            float wx = (float)(point.x + 0.5);
+            float wy = (float)point.y;
+            float wz = (float)(point.z + 0.5);
+            if (!Render3D.isVisible(wx, wy + 1.4f, wz, cx, cy, cz,
+                    camera.getYaw(), camera.getPitch(), 96.0)) continue;
+
+            float x = (float)(wx - cx), y = (float)(wy - cy), z = (float)(wz - cz);
             float spin = rotation + (float)(point.x * 0.13 + point.z * 0.17);
             int color = point.color;
-
             float beamHeight = 8.0f;
-            Vec3d a = p.add(-0.065, 0.10, 0), b = p.add(0.065, 0.10, 0);
-            Vec3d c = p.add(0.065, beamHeight, 0), d = p.add(-0.065, beamHeight, 0);
-            Render3D.drawRibbon(quads, context.matrices().peek(), a, b, d, c,
-                    MathUtil.withAlpha(color, 0.045f), MathUtil.withAlpha(color, 0.0f));
-            Vec3d e = p.add(0, 0.10, -0.065), f = p.add(0, 0.10, 0.065);
-            Vec3d g = p.add(0, beamHeight, 0.065), h = p.add(0, beamHeight, -0.065);
-            Render3D.drawRibbon(quads, context.matrices().peek(), e, f, h, g,
-                    MathUtil.withAlpha(color, 0.045f), MathUtil.withAlpha(color, 0.0f));
+            int beamStart = MathUtil.withAlpha(color, 0.045f);
+            int beamEnd = MathUtil.withAlpha(color, 0.0f);
 
-            Vec3d center = p.add(0, 1.45, 0);
-            double sin = Math.sin(spin), cos = Math.cos(spin);
-            Vec3d top = center.add(0, 0.48, 0), bottom = center.add(0, -0.48, 0);
-            Vec3d[] sides = {
-                    center.add(cos * 0.34, 0, sin * 0.34),
-                    center.add(-sin * 0.34, 0, cos * 0.34),
-                    center.add(-cos * 0.34, 0, -sin * 0.34),
-                    center.add(sin * 0.34, 0, -cos * 0.34)
-            };
-            for (Vec3d side : sides) {
-                Render3D.drawLine(lines, context.matrices().peek(), top, side, color);
-                Render3D.drawLine(lines, context.matrices().peek(), bottom, side, color);
-            }
-            for (int i = 0; i < 4; i++) {
-                Render3D.drawLine(lines, context.matrices().peek(), sides[i], sides[(i + 1) % 4], color);
-            }
-            Render3D.drawRing(lines, context.matrices().peek(), center, 0.53f, 0,
-                    MathUtil.withAlpha(color, 0.82f), 36);
-            Render3D.drawRing(lines, context.matrices().peek(), p, 0.42f, 0.035f,
-                    MathUtil.withAlpha(color, 0.45f), 28);
+            Render3D.drawRibbon(quads, matrix,
+                    x - 0.065f, y + 0.10f, z, x + 0.065f, y + 0.10f, z,
+                    x - 0.065f, y + beamHeight, z, x + 0.065f, y + beamHeight, z,
+                    beamStart, beamEnd);
+            Render3D.drawRibbon(quads, matrix,
+                    x, y + 0.10f, z - 0.065f, x, y + 0.10f, z + 0.065f,
+                    x, y + beamHeight, z - 0.065f, x, y + beamHeight, z + 0.065f,
+                    beamStart, beamEnd);
+
+            float centerY = y + 1.45f;
+            float topY = centerY + 0.48f;
+            float bottomY = centerY - 0.48f;
+            float c = (float)Math.cos(spin), s = (float)Math.sin(spin);
+            float r = 0.34f;
+            float s0x = x + c * r, s0z = z + s * r;
+            float s1x = x - s * r, s1z = z + c * r;
+            float s2x = x - c * r, s2z = z - s * r;
+            float s3x = x + s * r, s3z = z - c * r;
+            Render3D.drawLine(quads, matrix, x, topY, z, s0x, centerY, s0z, color);
+            Render3D.drawLine(quads, matrix, x, bottomY, z, s0x, centerY, s0z, color);
+            Render3D.drawLine(quads, matrix, x, topY, z, s1x, centerY, s1z, color);
+            Render3D.drawLine(quads, matrix, x, bottomY, z, s1x, centerY, s1z, color);
+            Render3D.drawLine(quads, matrix, x, topY, z, s2x, centerY, s2z, color);
+            Render3D.drawLine(quads, matrix, x, bottomY, z, s2x, centerY, s2z, color);
+            Render3D.drawLine(quads, matrix, x, topY, z, s3x, centerY, s3z, color);
+            Render3D.drawLine(quads, matrix, x, bottomY, z, s3x, centerY, s3z, color);
+            Render3D.drawLine(quads, matrix, s0x, centerY, s0z, s1x, centerY, s1z, color);
+            Render3D.drawLine(quads, matrix, s1x, centerY, s1z, s2x, centerY, s2z, color);
+            Render3D.drawLine(quads, matrix, s2x, centerY, s2z, s3x, centerY, s3z, color);
+            Render3D.drawLine(quads, matrix, s3x, centerY, s3z, s0x, centerY, s0z, color);
+            Render3D.drawRing(quads, matrix, x, centerY, z, 0.53f, 0,
+                    MathUtil.withAlpha(color, 0.82f), 32);
+            Render3D.drawRing(quads, matrix, x, y, z, 0.42f, 0.035f,
+                    MathUtil.withAlpha(color, 0.45f), 32);
         }
     }
 
@@ -193,26 +207,31 @@ public final class Waypoints {
         String dimension = client.world.getRegistryKey().getValue().toString();
         Camera camera = client.gameRenderer.getCamera();
         Vec3d cameraPos = camera.getCameraPos();
+        double cameraX = cameraPos.x, cameraY = cameraPos.y, cameraZ = cameraPos.z;
         int width = context.getScaledWindowWidth(), height = context.getScaledWindowHeight();
         double fov = Math.toRadians(client.options.getFov().getValue());
         double focal = (height * 0.5) / Math.tan(fov * 0.5);
         double yaw = Math.toRadians(camera.getYaw()), pitch = Math.toRadians(camera.getPitch());
-        Vec3d right = new Vec3d(Math.cos(yaw), 0, Math.sin(yaw));
-        Vec3d up = new Vec3d(-Math.sin(yaw) * Math.sin(pitch), Math.cos(pitch),
-                Math.cos(yaw) * Math.sin(pitch));
-        Vec3d forward = new Vec3d(-Math.sin(yaw) * Math.cos(pitch), -Math.sin(pitch),
-                Math.cos(yaw) * Math.cos(pitch));
+        double rightX = Math.cos(yaw), rightZ = Math.sin(yaw);
+        double upX = -Math.sin(yaw) * Math.sin(pitch);
+        double upY = Math.cos(pitch);
+        double upZ = Math.cos(yaw) * Math.sin(pitch);
+        double forwardX = -Math.sin(yaw) * Math.cos(pitch);
+        double forwardY = -Math.sin(pitch);
+        double forwardZ = Math.cos(yaw) * Math.cos(pitch);
 
         for (Waypoint point : POINTS) {
             if (!point.enabled || !safe(point.dimension).equals(dimension)) continue;
-            Vec3d target = new Vec3d(point.x + 0.5, point.y + 1.65, point.z + 0.5);
-            Vec3d delta = target.subtract(cameraPos);
-            double depth = delta.dotProduct(forward);
+            double dx = point.x + 0.5 - cameraX;
+            double dy = point.y + 1.65 - cameraY;
+            double dz = point.z + 0.5 - cameraZ;
+            double depth = dx * forwardX + dy * forwardY + dz * forwardZ;
             if (depth <= 0.15) continue;
-            double distance = Math.sqrt(delta.lengthSquared());
-            if (distance < 5.0 || distance > 160.0) continue;
-            double sx = width * 0.5 + delta.dotProduct(right) * focal / depth;
-            double sy = height * 0.5 - delta.dotProduct(up) * focal / depth;
+            double distanceSq = dx * dx + dy * dy + dz * dz;
+            if (distanceSq < 25.0 || distanceSq > 96.0 * 96.0) continue;
+            double distance = Math.sqrt(distanceSq);
+            double sx = width * 0.5 + (dx * rightX + dz * rightZ) * focal / depth;
+            double sy = height * 0.5 - (dx * upX + dy * upY + dz * upZ) * focal / depth;
             if (sx < -100 || sx > width + 100 || sy < -50 || sy > height + 50) continue;
 
             float alpha = MathUtil.clamp((float)((distance - 5.0) / 3.0), 0, 1);
