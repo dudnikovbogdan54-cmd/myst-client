@@ -17,6 +17,6 @@ public abstract class LightmapTextureManagerMixin {
 
     @Inject(method = "getBrightness(FI)F", at = @At("HEAD"), cancellable = true)
     private static void mystvisuals$fullbrightAmbient(float ambientLight, int lightLevel, CallbackInfoReturnable<Float> cir) {
-        if (MystConfig.enabled("fullbright")) cir.setReturnValue(1.0F);
+        if (ModuleManager.enabled("Fullbright")) cir.setReturnValue(1.0F);
     }
 }
