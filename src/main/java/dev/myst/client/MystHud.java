@@ -19,7 +19,6 @@ public final class MystHud {
     private static int leftClicks, rightClicks, shownLeftCps, shownRightCps;
     private static long cpsWindowStart = System.currentTimeMillis();
     private static float displayedTargetHealth = -1.0F;
-    private static int worldFxTicks;
     private MystHud() {}
 
     public static void register() {
@@ -101,23 +100,6 @@ public final class MystHud {
             panel(ctx, x, by, Math.min(190, mc.textRenderer.getWidth(name) + 18), 20);
             ctx.drawTextWithShadow(mc.textRenderer, name, x + 8, by + 6, 0xFFF1E9FF);
         }
-        if (MystConfig.enabled("waypoints")) {
-            int markY = 8;
-            for (MystConfig.Waypoint point : MystConfig.waypoints) {
-                if (!point.enabled) continue;
-                double dx = point.x - mc.player.getX();
-                double dy = point.y - mc.player.getY();
-                double dz = point.z - mc.player.getZ();
-                int distance = (int)Math.round(Math.sqrt(dx * dx + dy * dy + dz * dz));
-                String label = point.name + "  " + (int)point.x + " " + (int)point.y + " " + (int)point.z
-                        + (point.showDistance ? "  (" + distance + "m)" : "");
-                int w = mc.textRenderer.getWidth(label) + 16;
-                int x = ctx.getScaledWindowWidth() - w - 8;
-                panel(ctx, x, markY, w, 20);
-                ctx.drawTextWithShadow(mc.textRenderer, label, x + 8, markY + 6, point.color);
-                markY += 24;
-            }
-        }
         if (MystConfig.enabled("crosshair")) drawCrosshair(ctx);
         if (MystConfig.enabled("keystrokes")) drawKeystrokes(ctx, mc);
     }
@@ -166,33 +148,6 @@ public final class MystHud {
         ctx.drawTextWithShadow(mc.textRenderer, label, x + (40 - tw) / 2, y + 6, 0xFFF5EEFF);
     }
 
-    private static void spawnWaypointWorldFx(MinecraftClient mc) {
-        if (mc.player == null || mc.world == null || !MystConfig.enabled("waypoints")) return;
-        if (++worldFxTicks % 5 != 0) return;
-        String dimension = mc.world.getRegistryKey().getValue().toString();
-        double px = mc.player.getX(), py = mc.player.getY(), pz = mc.player.getZ();
-        for (MystConfig.Waypoint point : MystConfig.waypoints) {
-            if (!point.enabled) continue;
-            if (point.dimension != null && !point.dimension.isBlank() && !point.dimension.equals(dimension)) continue;
-            double x = point.x + 0.5, y = point.y + 0.15, z = point.z + 0.5;
-            double dx = x - px, dy = y - py, dz = z - pz;
-            if (dx * dx + dy * dy + dz * dz > 96.0 * 96.0) continue;
-            // A small animated 3D beacon: base, upper marker and a rotating purple halo.
-            mc.world.addImportantParticleClient(ParticleTypes.END_ROD, x, y, z, 0.0, 0.025, 0.0);
-            mc.world.addImportantParticleClient(ParticleTypes.END_ROD, x, y + 1.6, z, 0.0, 0.018, 0.0);
-            mc.world.addImportantParticleClient(ParticleTypes.WITCH, x, y + 2.8, z, 0.0, 0.0, 0.0);
-            if (worldFxTicks % 10 == 0) {
-                double angle = worldFxTicks * 0.16;
-                for (int i = 0; i < 3; i++) {
-                    double a = angle + i * (Math.PI * 2.0 / 3.0);
-                    mc.world.addImportantParticleClient(ParticleTypes.END_ROD,
-                            x + Math.cos(a) * 0.55, y + 0.1, z + Math.sin(a) * 0.55,
-                            0.0, 0.01, 0.0);
-                }
-            }
-        }
-    }
-
     private static void spawnKillWorldFx(MinecraftClient mc, LivingEntity target) {
         double x = target.getX(), y = target.getY() + target.getHeight() * 0.55, z = target.getZ();
         for (int i = 0; i < 28; i++) {
@@ -220,7 +175,6 @@ public final class MystHud {
                 shownLeftCps = leftClicks; shownRightCps = rightClicks;
                 leftClicks = rightClicks = 0; cpsWindowStart = now;
             }
-            spawnWaypointWorldFx(mc);
         } else {
             lastAttackPressed = lastUsePressed = false;
         }
