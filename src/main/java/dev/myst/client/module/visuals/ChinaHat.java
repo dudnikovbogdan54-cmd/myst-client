@@ -11,9 +11,11 @@ import net.minecraft.util.math.Vec3d;
 
 /** Floating neon halo and wireframe cone above the local player in third person. */
 public final class ChinaHat {
-    private static boolean initialized; private static boolean enabled;
-    public static void setEnabled(boolean value) { enabled = value; }
+    private static boolean initialized;
+    private static boolean enabled;
     private static long ticks;
+
+    public static void setEnabled(boolean value) { enabled = value; }
     private ChinaHat() {}
 
     public static void initialize() {
@@ -27,23 +29,34 @@ public final class ChinaHat {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.world == null
                 || client.options.getPerspective().isFirstPerson()) return;
+
+        var camera = client.gameRenderer.getCamera();
+        Vec3d cameraPos = camera.getCameraPos();
+        float hx = (float)(client.player.getX() - cameraPos.x);
+        float hy = (float)(client.player.getY() + client.player.getHeight() + 0.22 - cameraPos.y);
+        float hz = (float)(client.player.getZ() - cameraPos.z);
+        if (!Render3D.isVisible((float)client.player.getX(),
+                (float)(client.player.getY() + client.player.getHeight() + 0.22),
+                (float)client.player.getZ(), cameraPos.x, cameraPos.y, cameraPos.z,
+                camera.getYaw(), camera.getPitch(), 48.0)) return;
+
         ticks++;
-        Vec3d camera = client.gameRenderer.getCamera().getCameraPos();
-        Vec3d head = new Vec3d(client.player.getX(),
-                client.player.getY() + client.player.getHeight() + 0.22, client.player.getZ()).subtract(camera);
-        VertexConsumer lines = context.consumers().getBuffer(RenderLayers.lines());
+        VertexConsumer quads = context.consumers().getBuffer(RenderLayers.debugQuads());
+        var matrix = context.matrices().peek();
         float pulse = 0.85f + (float)Math.sin(ticks * 0.08) * 0.15f;
         int neon = MathUtil.withAlpha(0xFFB56CFF, pulse);
         int cyan = MathUtil.withAlpha(0xFF55E7FF, 0.58f * pulse);
         float radius = 0.68f;
-        Render3D.drawRing(lines, context.matrices().peek(), head, radius, 0, neon, 64);
-        Render3D.drawRing(lines, context.matrices().peek(), head, radius * 0.78f, 0.035f, cyan, 48);
-        Vec3d apex = head.add(0, 0.42, 0);
+        Render3D.drawRing(quads, matrix, hx, hy, hz, radius, 0, neon, 32);
+        Render3D.drawRing(quads, matrix, hx, hy, hz, radius * 0.78f, 0.035f, cyan, 32);
+
+        float apexY = hy + 0.42f;
         for (int i = 0; i < 32; i++) {
-            double angle = Math.PI * 2 * i / 32.0;
-            Vec3d edge = head.add(Math.cos(angle) * radius, 0.015, Math.sin(angle) * radius);
-            Render3D.drawLine(lines, context.matrices().peek(), edge, apex,
-                    MathUtil.withAlpha(neon, 0.76f));
+            double angle = Math.PI * 2.0 * i / 32.0;
+            float ex = hx + (float)Math.cos(angle) * radius;
+            float ez = hz + (float)Math.sin(angle) * radius;
+            Render3D.drawLine(quads, matrix, ex, hy + 0.015f, ez,
+                    hx, apexY, hz, MathUtil.withAlpha(neon, 0.76f));
         }
     }
 }
